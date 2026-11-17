@@ -1,0 +1,1570 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Play Strahtura v1.02</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=EB+Garamond:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+:root{color-scheme:light;--ink:#2d1f10;--parch:#f3e6c6;--parch2:#ead9b0;--gold:#b8892b;--red:#8a2020;--light:#ecd9ab;--dark:#9a6a3a;--sq:min(10.5vw,64px)}
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;background:#2a1d12 radial-gradient(circle at 50% 0,#4a3220,#1c130b);color:var(--ink);font-family:"EB Garamond",Georgia,serif;font-size:16px}
+h1,h2,h3{font-family:Cinzel,Georgia,serif;margin:0}
+header{position:relative;z-index:20;display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);align-items:center;gap:8px 12px;padding:10px 16px;color:#f3e6c6;border-bottom:2px solid var(--gold)}
+.hdr-side{display:flex;flex-wrap:wrap;align-items:center;gap:8px 10px;min-width:0}
+.hdr-side.right{justify-content:flex-end}
+.hdr-mid{display:flex;flex-wrap:wrap;justify-content:center;gap:8px}
+input[type=range]{width:100%;accent-color:var(--gold)}
+@media(max-width:860px){header{grid-template-columns:1fr}.hdr-side.right{justify-content:flex-start}}
+#bMusic.off,#mMusic.off{opacity:.85}
+#mZip{font-family:"EB Garamond",Georgia,serif;font-size:15px;background:var(--parch);color:var(--ink);border:1.5px solid var(--gold);border-radius:6px;padding:5px 10px;text-decoration:none}
+body.sheet header{display:none}
+body.sheet .modal{top:0;bottom:0;height:auto;background:transparent;align-items:center;padding:16px;z-index:80}
+body.sheet .modal .box{max-height:92vh}
+.menutop{display:flex;justify-content:flex-end;align-items:center;gap:8px;margin:0 0 8px}
+.menutitle{display:flex;align-items:center;justify-content:center;gap:16px}
+.crestwrap{display:flex;flex-direction:column;align-items:center;gap:1px;font-style:normal;font-family:Cinzel,Georgia,serif;font-size:11px;letter-spacing:.06em;color:#7a1a1a;font-weight:700}
+.crestwrap img{width:84px;height:104px;object-fit:contain;display:block}
+.lorekings{display:flex;justify-content:center;align-items:center;gap:22px;margin:8px 0 2px}
+.loreking{width:148px;height:148px;background:#f6ead0;border:2px solid var(--gold);border-radius:4px;display:flex;align-items:center;justify-content:center;box-shadow:inset 0 0 0 5px #efe0c0;overflow:hidden}
+.loreking img{width:100%;height:100%;object-fit:cover}
+header h1{font-size:22px;letter-spacing:.06em}
+header .ver{font-size:13px;opacity:.75}
+header .sp{flex:1}
+button{font-family:"EB Garamond",Georgia,serif;font-size:15px;background:var(--parch);color:var(--ink);border:1.5px solid var(--gold);border-radius:6px;padding:5px 10px;cursor:pointer}
+button:hover:not(:disabled){background:#fff4d6}
+button.primary:hover:not(:disabled){background:#c99a35;color:#fff8e6}
+button.danger:hover:not(:disabled){color:var(--red)}
+button:disabled{opacity:.45;cursor:default}
+button.primary{background:var(--gold);color:#fff8e6;border-color:#7a5a1a}
+button.danger{border-color:var(--red);color:var(--red)}
+.wrap{display:grid;grid-template-columns:230px auto 330px;gap:14px;padding:14px;align-items:start;justify-content:center}
+@media(max-width:1100px){.wrap{grid-template-columns:1fr;justify-items:center}.panel{width:min(560px,96vw)}.center{order:-1}}
+.panel{background:var(--parch);border:2px solid var(--gold);border-radius:10px;padding:10px 12px;box-shadow:0 4px 18px #0006}
+.panel h2{font-size:15px;border-bottom:1px solid var(--gold);padding-bottom:4px;margin-bottom:6px}
+.panel h3{font-size:13px;margin:8px 0 4px}
+.center{display:flex;flex-direction:column;align-items:center;gap:8px}
+.status{width:calc(var(--sq)*8 + 44px);background:var(--parch);border:2px solid var(--gold);border-radius:10px;padding:8px 12px;font-size:16px}
+.status .who{font-family:Cinzel;font-weight:700}
+.status .flags span{display:inline-block;margin:4px 6px 0 0;padding:1px 8px;border-radius:10px;background:var(--parch2);font-size:14px}
+.status .flags .bad{background:var(--red);color:#fff}
+#actbar:empty{display:none}
+#actbar{position:fixed;left:0;right:0;bottom:0;z-index:7;background:var(--parch);border-top:3px solid var(--gold);padding:8px 10px calc(8px + env(safe-area-inset-bottom));box-shadow:0 -8px 18px #0008}
+#actbar .who{font-family:Cinzel,Georgia,serif;font-weight:700;text-align:center;margin-bottom:4px}
+#actbar .btns{justify-content:center}
+.arts2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+@media(max-width:700px){.arts2{grid-template-columns:1fr}}
+.camp{display:grid;grid-template-columns:20px repeat(8,var(--sq)) 20px;align-items:center;color:#e9d6a8;font-size:12px;padding:4px 0}
+.camp .lbl{grid-column:1/-1;text-align:center;font-family:Cinzel;font-size:12px;opacity:.85;margin:2px 0}
+.camp .cs{margin:5px;height:calc(var(--sq) - 10px);border:2px dashed #c9a24f99;border-radius:8px;background:#2a1d1299;position:relative;display:flex;align-items:center;justify-content:center;cursor:default}
+.camp .cs svg,.camp .cs img{width:80%;height:80%;object-fit:contain}
+.camp .cs.full{border-color:#e7c766}
+.camp .cs.blocked{border-color:#c0262b}
+.camp .cs.fogok{cursor:pointer}
+.camp .cs.ok{border-color:#2f7a2f;border-style:solid;background:#2f7a2f55;cursor:pointer}
+.camp .cs .badge{position:absolute;right:2px;bottom:1px;font-size:11px;font-weight:700;background:#000a;color:#ffe9a8;border-radius:6px;padding:0 4px;font-family:Cinzel}
+.boardwrap{display:grid;grid-template-columns:20px calc(var(--sq)*8) 20px;grid-template-rows:20px calc(var(--sq)*8) 20px;color:#e9d6a8;font-family:Cinzel;font-size:12px;background:#3b2918;border:3px solid var(--gold);border-radius:8px;padding:0}
+.coords{display:flex;align-items:center;justify-content:space-around}
+.coords.v{flex-direction:column}
+.board{display:grid;grid-template-columns:repeat(8,var(--sq));grid-template-rows:repeat(8,var(--sq));border:2px solid #1c130b}
+.sqr{position:relative;display:flex;align-items:center;justify-content:center;cursor:pointer;user-select:none}
+.sqr.l{background:var(--light)}.sqr.d{background:var(--dark)}
+.sqr svg.pc,.sqr img.pc{width:88%;height:88%;object-fit:contain;filter:drop-shadow(0 2px 2px #0007);pointer-events:none}
+.sqr .badge{position:absolute;right:2px;bottom:1px;font-size:11px;font-weight:700;background:#000a;color:#ffe9a8;border-radius:6px;padding:0 4px;font-family:Cinzel}
+.sqr .tl{position:absolute;left:2px;top:0;font-size:13px}
+.sqr.dim svg.pc,.sqr.dim img.pc{opacity:.55}
+.plaque{width:100%;max-height:168px;object-fit:contain;display:block;margin:6px auto;border-radius:8px;background:#2a1c12}
+.sqr.can::before{content:"";position:absolute;inset:2px;border:2px solid #ffffff55;border-radius:4px}
+.sqr.selp::before{content:"";position:absolute;inset:0;border:4px solid #ffd76a;}
+.sqr.h-mov::after,.sqr.h-pick::after{content:"";position:absolute;width:30%;height:30%;border-radius:50%;background:#2f7a2fcc}
+.sqr.h-pick::after{background:#c9a227dd}
+.sqr.h-cap::after{content:"";position:absolute;inset:3px;border:4px solid #c0262bdd;border-radius:50%}
+.sqr.h-stk::after{content:"";position:absolute;inset:3px;border:4px solid #2a5fbfdd;border-radius:8px}
+.sqr.h-por::after{content:"";position:absolute;inset:3px;border:4px dashed #7b3cc0;border-radius:8px}
+.sqr.h-ex::after{content:"";position:absolute;width:34%;height:34%;border-radius:50%;background:#7b3cc0cc}
+.sqr.danger{box-shadow:inset 0 0 0 4px #e0302f, inset 0 0 18px #e0302f}
+.sqr.place::after{content:"＋";position:absolute;color:#2f7a2f;font-size:28px;font-weight:700}
+.btns{display:flex;flex-wrap:wrap;gap:6px}
+.btns button{flex:1 1 auto}
+.card{border:1.5px solid var(--gold);border-radius:8px;padding:6px 8px;background:#fbf2dc;margin-bottom:6px}
+.card .nm{font-family:Cinzel;font-weight:700;font-size:14px}
+.card .fg{font-style:italic;font-size:13px;opacity:.8}
+.card .cs{font-size:13px;color:var(--red)}
+.card .tx{font-size:14px;margin-top:2px}
+.card.used{opacity:.5}
+.tw{display:flex;gap:6px;align-items:center;font-size:13px}
+.tw .slot{width:34px;height:34px;border:1.5px solid var(--gold);border-radius:6px;display:flex;align-items:center;justify-content:center;background:#fbf2dc}
+.tw .slot.lost{background:#d9c7a0;color:var(--red);font-weight:700}
+.tw .slot svg,.tw .slot img{width:28px;height:28px;object-fit:contain}
+.gy{display:grid;grid-template-columns:auto 1fr;gap:2px 8px;align-items:center;font-size:14px}
+.gy svg,.gy img{width:26px;height:26px;object-fit:contain}
+.log{max-height:240px;overflow:auto;font-size:14px;background:#fbf2dc;border:1px solid var(--gold);border-radius:6px;padding:4px 6px}
+.log div{border-bottom:1px dotted #c9b48a;padding:2px 0}
+.hint{font-size:14px;font-style:italic;margin:4px 0}
+.modal{position:fixed;inset:0;background:#000b;display:flex;align-items:center;justify-content:center;z-index:80;padding:12px}
+.modal .box{background:var(--parch);border:3px solid var(--gold);border-radius:12px;max-width:900px;width:100%;max-height:92vh;overflow:auto;padding:16px 20px}
+.modal h2{font-size:20px;margin-bottom:8px}
+.grid3{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:8px}
+.pick{cursor:pointer}.pick:hover{background:#fff4d6}
+.pick.taken{opacity:.35;cursor:default}
+.rules h3{font-size:15px;margin-top:12px}
+.rules li{margin:2px 0}
+.legend{display:flex;flex-wrap:wrap;gap:8px;font-size:13px;margin-top:6px}
+.legend i{display:inline-block;width:12px;height:12px;border-radius:50%;margin-right:3px;vertical-align:middle}
+.clocks{display:flex;gap:10px;margin-bottom:4px;flex-wrap:wrap}
+.clk{padding:1px 10px;border-radius:10px;background:var(--parch2);font-size:15px}
+.clk.on{background:#2d1f10;color:#ffe9a8}.clk.low b{color:#e0302f}
+textarea{width:100%;height:240px;font-family:monospace;font-size:12px}
+/* Δ-17 board themes, highlights, effects */
+.board.th-walnut .sqr.l{background:#e9cfa1 repeating-linear-gradient(97deg,rgba(120,80,40,.08) 0 2px,transparent 2px 9px)}
+.board.th-walnut .sqr.d{background:#6f4528 repeating-linear-gradient(97deg,rgba(0,0,0,.14) 0 2px,transparent 2px 8px)}
+.board.th-marble .sqr{box-shadow:inset 0 0 0 1px rgba(255,255,255,.12), inset 0 0 18px rgba(40,36,32,.18)}
+.board.th-marble .sqr.l{background-color:#f4f0e8;background-image:radial-gradient(ellipse 90% 46% at 18% 28%,rgba(255,255,255,.55),transparent 62%),radial-gradient(ellipse 70% 40% at 82% 78%,rgba(176,170,160,.45),transparent 64%),linear-gradient(122deg,transparent 0 16%,rgba(148,144,154,.34) 17.4%,transparent 19.2%),linear-gradient(78deg,transparent 0 48%,rgba(120,116,126,.22) 49.2%,transparent 51%),linear-gradient(164deg,#fbf8f2,#e6e0d4 46%,#f3eee6 78%,#d9d2c6)}
+.board.th-marble .sqr.l:nth-child(4n+1){background-image:radial-gradient(ellipse 80% 50% at 78% 22%,rgba(255,255,255,.5),transparent 60%),radial-gradient(ellipse 55% 36% at 12% 80%,rgba(160,154,146,.4),transparent 66%),linear-gradient(48deg,transparent 0 28%,rgba(130,126,138,.3) 29.3%,transparent 31%),linear-gradient(156deg,transparent 0 63%,rgba(110,106,116,.18) 64%,transparent 66%),linear-gradient(18deg,#f7f3ec,#e0d9cc 55%,#efeae2)}
+.board.th-marble .sqr.d{background-color:#5a564f;background-image:radial-gradient(ellipse 75% 42% at 24% 18%,rgba(255,250,242,.2),transparent 58%),radial-gradient(ellipse 60% 48% at 80% 76%,rgba(18,14,12,.4),transparent 62%),linear-gradient(118deg,transparent 0 24%,rgba(255,255,255,.28) 25.2%,transparent 27%),linear-gradient(66deg,transparent 0 57%,rgba(255,244,230,.16) 58.1%,transparent 60%),linear-gradient(168deg,#6d6862,#3a3734 50%,#524e49)}
+.board.th-marble .sqr.d:nth-child(4n+3){background-image:radial-gradient(ellipse 65% 38% at 70% 24%,rgba(255,255,255,.16),transparent 60%),radial-gradient(ellipse 50% 44% at 16% 72%,rgba(10,8,6,.38),transparent 64%),linear-gradient(32deg,transparent 0 36%,rgba(255,255,255,.22) 37.1%,transparent 39%),linear-gradient(142deg,transparent 0 60%,rgba(255,236,214,.12) 61%,transparent 63%),linear-gradient(200deg,#625e58,#2f2c2a 48%,#4a4642)}
+.board.th-map .sqr.l{background-color:#ece0bf;background-image:radial-gradient(circle at 30% 70%,rgba(140,100,40,.12),transparent 55%);box-shadow:inset 0 0 0 .5px rgba(90,60,20,.35)}
+.board.th-map .sqr.d{background-color:#cbb383;background-image:radial-gradient(circle at 70% 30%,rgba(90,60,20,.16),transparent 60%);box-shadow:inset 0 0 0 .5px rgba(90,60,20,.4)}
+.board.th-night .sqr.l{background:#4b5568}.board.th-night .sqr.d{background:#2b3343}
+.boardwrap.th-night{background:#1b2130;border-color:#8aa0c8;color:#cfd9ee}
+.boardwrap.th-marble{background:#1c1a18;border-color:#e4ddd2}
+.boardwrap.th-map{background:#5a4326}
+.board.th-grass .sqr.l{background:#d7e3a6 repeating-linear-gradient(97deg,rgba(80,90,30,.08) 0 2px,transparent 2px 9px)}
+.board.th-grass .sqr.d{background:#6f8a3e repeating-linear-gradient(97deg,rgba(0,0,0,.12) 0 2px,transparent 2px 8px)}
+.boardwrap.th-grass{background:#243018;border-color:#c6a15a}
+.sqr.lm{box-shadow:inset 0 0 0 100px rgba(255,214,80,.24)}
+.board.th-night .sqr.lm{box-shadow:inset 0 0 0 100px rgba(140,180,255,.22)}
+.sqr.danger{animation:dangerpulse 1.1s ease-in-out infinite}
+@keyframes dangerpulse{0%,100%{box-shadow:inset 0 0 0 4px #e0302f,inset 0 0 18px #e0302f}50%{box-shadow:inset 0 0 0 4px #ff8a7f,inset 0 0 34px #ff4a3f}}
+#fx{position:fixed;inset:0;pointer-events:none;z-index:6}
+.fxg{position:fixed;pointer-events:none;display:flex;align-items:center;justify-content:center}
+.fxg svg.gh,.fxg img.gh{width:88%;height:88%;object-fit:contain}
+select{font-family:inherit;font-size:15px;padding:4px 6px;border:1.5px solid var(--gold);border-radius:6px;background:#fbf2dc;color:#2d1f10}
+select option{background:#fbf2dc;color:#2d1f10}
+.modal .box{color:#2d1f10}
+.stylegrid{display:grid;grid-template-columns:auto 1fr;gap:8px 12px;align-items:center;margin:8px 0}
+.stylegrid label{font-family:Cinzel;font-size:14px}
+.stylepreview{display:flex;flex-wrap:wrap;gap:2px;justify-content:center;background:#c9a77a;border-radius:8px;padding:6px;margin:6px 0}
+.stylepreview svg,.stylepreview img{width:44px;height:44px;object-fit:contain}
+.minib{display:grid!important;grid-template-columns:repeat(4,40px);grid-template-rows:repeat(4,40px);margin:6px auto;width:max-content;border:2px solid #1c130b}
+.minib .sqr{cursor:default}
+.crest{width:22px;height:22px;vertical-align:-4px;margin-right:4px;object-fit:contain}
+@media (prefers-reduced-motion: reduce){.sqr.danger{animation:none}}
+
+.rules{max-width:860px;border:6px double var(--gold);background:#f6ead0 radial-gradient(circle at 50% 0,#fbf3df,#efdfb8)}
+.rbclose{position:sticky;top:-16px;display:flex;justify-content:flex-end;z-index:2;margin:-6px -8px 0 0}
+.rb .rbt{text-align:center;font-size:26px;color:#7a1a1a;letter-spacing:.05em}
+.rb .rbs{text-align:center;font-style:italic;margin:2px 0 10px}
+.rbtoc{columns:2;border:1.5px solid var(--gold);border-radius:8px;padding:8px 12px;background:#fbf2dc;margin-bottom:8px}
+.rbtoc a{display:block;cursor:pointer;color:#5a2a0a;font-family:Cinzel;font-size:13px;padding:2px 0}
+.rbtoc a:hover{color:#8a2020;text-decoration:underline}
+.rb h3{font-size:18px;color:#7a1a1a;margin:18px 0 6px;border-bottom:2px solid var(--gold);padding-bottom:3px;scroll-margin-top:40px}
+.rb h3 .orn{color:var(--gold)}
+.rb h4{font-family:Cinzel;margin:0 0 4px;font-size:15px}
+.rb p.dc::first-letter{float:left;font-family:Cinzel;font-size:3.1em;line-height:.85;color:#8a2020;padding:4px 6px 0 0;text-shadow:1px 1px 0 var(--gold)}
+.rbp{display:grid;grid-template-columns:auto 1fr;gap:12px;align-items:start;margin:8px 0}
+@media(max-width:600px){.rbp{grid-template-columns:1fr}.rbtoc{columns:1}}
+.rbq{border-collapse:collapse;width:100%;font-size:15px}.rbq th,.rbq td{border:1px solid var(--gold);padding:4px 8px;text-align:left}.rbq th{font-family:Cinzel;background:#efdcae}
+</style>
+</head>
+<body>
+<header>
+  <div class="hdr-side">
+    <h1>⚜ Strahtura</h1><span class="ver">v1.02 · strah-TOO-rah</span>
+  </div>
+  <div class="hdr-mid">
+    <button id="bUndo">↶ Undo</button>
+    <button id="bForfeit" class="danger">Forfeit</button>
+    <button id="bNew" class="danger">New game</button>
+  </div>
+  <div class="hdr-side right">
+    <label style="font-size:15px;display:flex;align-items:center;gap:6px;cursor:pointer"><input type="checkbox" id="cAuto"> Auto end turn</label>
+    <button id="bPause" style="display:none">⏸ Pause</button>
+    <button id="bStep" style="display:none">⏭ Step</button>
+    <button id="bMusic" type="button" title="Mute music. Click again to play it. Effects stay on.">🔊</button>
+    <button id="bStyle">⚙ Settings</button>
+  </div>
+</header>
+<div class="wrap">
+  <div class="panel" id="left"></div>
+  <div class="center">
+    <div class="status" id="status"></div>
+    <div class="camp" id="campB"></div>
+    <div class="boardwrap" id="boardwrap"></div>
+    <div class="camp" id="campW"></div>
+    <div id="actions" class="underboard"></div>
+    <div id="arts" class="underboard arts2"></div>
+  </div>
+  <div id="right" style="display:flex;flex-direction:column;gap:12px"></div>
+</div>
+<div id="modal"></div>
+<div id="actbar"></div>
+<div id="fx"></div>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+<linearGradient id="cgW" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#fffaf0"/><stop offset=".45" stop-color="#f1e3c3"/><stop offset="1" stop-color="#c4aa7c"/></linearGradient>
+<linearGradient id="cgB" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#5e5650"/><stop offset=".45" stop-color="#2c2622"/><stop offset="1" stop-color="#121010"/></linearGradient>
+</defs></svg>
+<script>
+"use strict";
+/* ===================== DATA ===================== */
+const FILES='abcdefgh', NAME={w:'White',b:'Black'};
+let prefs={piece:'woodcut',board:'classic',sound:true,music:true,vol:100,track:'pursuit',playing:'menu',motion:!(window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches)};
+try{const sp=JSON.parse(localStorage.getItem('strahtura_prefs15')||'null');if(sp&&typeof sp==='object')prefs=Object.assign(prefs,sp);}catch(e){}
+if(prefs.piece==='painted'||prefs.piece==='carved')prefs.piece=prefs.piece==='carved'?'classic':'woodcut';
+if(prefs.piece!=='woodcut'&&prefs.piece!=='woodhelm'&&prefs.piece!=='classic')prefs.piece='woodcut';
+if(prefs.track!=='menu'&&prefs.track!=='pursuit'&&prefs.track!=='embers')prefs.track='pursuit';
+if(typeof prefs.vol!=='number'||prefs.vol<0||prefs.vol>100)prefs.vol=100;
+const DIAG=[[1,1],[1,-1],[-1,1],[-1,-1]], ORTH=[[1,0],[-1,0],[0,1],[0,-1]], ALL8=[...DIAG,...ORTH];
+const LJ=[[1,2],[2,1],[-1,2],[-2,1],[1,-2],[2,-1],[-1,-2],[-2,-1]];
+const ART=[
+ {id:'archers',name:'Hidden Archers',fig:'Line of archers on a platform',cost:'1 action (knight) · 2 (cavalry)',text:'Kill an enemy knight or cavalry standing on your half of the board.'},
+ {id:'golem',name:'Stone Golem',fig:'Stone golem',cost:'2 actions',text:'One single Wizard Tower moves 1 square in any direction: onto an open square, capturing an enemy piece, or destroying an enemy tower or Archmage\'s Tower. It stays a single tower. An Archmage, and an Archmage\'s Tower, cannot be a golem.'},
+ {id:'decree',name:'Royal Decree',fig:'Scroll',cost:'2 actions',text:'Promote any one of your single knights to a noble.'},
+ {id:'banner',name:'War Banner',fig:'Banner on a pole',cost:'1 action',text:'One knight moves and captures like a cavalry (diagonal, up to 3) this turn.'},
+ {id:'sellswords',name:'Sellswords',fig:'Hooded knight',cost:'1 action per pair',text:'Each action recruits 2 of your fallen knights to your camp squares (2 for 1 action, 4 for 2).'},
+ {id:'berserker',name:'Berserker',fig:'Crazed Viking',cost:'2 actions',text:'A single knight captures diagonally forward again and again; stop whenever you choose.'},
+ {id:'keg',name:'Powder Keg',fig:'Ball bomb with a fuse',cost:'2 actions',text:'Sacrifice your knight or cavalry touching an enemy Wizard Tower or Archmage\'s Tower to destroy that tower.'},
+ {id:'blink',name:'Blink Rune',fig:'Glowing rune stone',cost:'1 action',text:'Your tower or Archmage swaps places with one of your pieces.'},
+ {id:'flank',name:'Flank',fig:'Flag with left and right arrows',cost:'1 action per piece',text:'A knight or cavalry steps 1 square left or right (no capture; may stack or enter your tower). Usable on up to 2 pieces in the turn you play it.'},
+ {id:'shield',name:'Shield Wall',fig:'Shield',cost:'1 action',text:'One of your pieces cannot be captured until your next turn.'}
+];
+const ART_HOW={
+ archers:'Your half is the four rows nearest you. A single knight costs 1 action; a cavalry costs both actions. Not usable on your first turn.',
+ golem:'Pick one single Wizard Tower, not an Archmage and not an Archmage\'s Tower, then the square it steps to. It can capture, or destroy an enemy tower of either kind, then stands as a single tower again. Ends your turn.',
+ decree:'Pick any single knight of yours anywhere on the board; it flips to a noble. Ends your turn.',
+ banner:'Pick a knight that has not moved this turn, then its diagonal destination up to 3 squares away. It may capture like a cavalry but cannot stack.',
+ sellswords:'Choose 1 or 2 actions and whether the recruits arrive as single knights or cavalry pairs. Then click the camp square for each recruit (a cavalry pair needs an empty camp square). They land at the start of your next turn and can act right away.',
+ berserker:'Pick a knight and its first diagonal-forward capture. Keep clicking further captures, or press Stop. Promoting on the back row ends the rampage.',
+ keg:'Pick your knight or cavalry next to an enemy Wizard Tower or Archmage\'s Tower, then that tower. Your piece goes to your own graveyard half; the tower is destroyed. Ends your turn.',
+ blink:'Pick your tower or Archmage, then any of your pieces. They trade places; the swapped piece counts as having acted.',
+ flank:'Pick a knight or cavalry, then the square beside it. You may use it on a second piece in the same turn with your other action.',
+ shield:'Pick one of your pieces. Nothing can capture it until the start of your next turn.'
+};
+const ARTK={archers:['archers'],golem:['golem'],decree:['decree'],banner:['banner'],sellswords:['sell'],berserker:['berserk'],keg:['keg'],blink:['blink'],flank:['flank'],shield:['shield']};
+const artById=id=>ART.find(a=>a.id===id);
+
+/* ===================== HELPERS ===================== */
+const sq=(r,c)=>FILES[c]+(8-r);
+const inB=(r,c)=>r>=0&&r<8&&c>=0&&c<8;
+const opp=p=>p==='w'?'b':'w';
+const fwd=p=>p==='w'?-1:1;
+const backRow=p=>p==='w'?7:0;
+const homeRows=p=>p==='w'?[7,6]:[0,1];
+const eq=(a,b)=>a&&b&&a[0]===b[0]&&a[1]===b[1];
+const clone=o=>{const l=o.log;o.log=[];const t=JSON.parse(JSON.stringify(o));o.log=l;return t;};
+function pname(s){if(s.t==='knight')return s.n===2?'Cavalry':'Knight';if(s.t==='noble')return s.n===2?'King':'Noble';if(s.t==='wizard')return s.n===2?'Archmage':'Wizard';if(s.n===2)return "Archmage's Tower";return 'Tower';}
+const isPortal=(s,p)=>s&&s.o===p&&(s.t==='tower'||(s.t==='wizard'&&s.n===2));
+function stacks(S,p){const o=[];for(let r=0;r<8;r++)for(let c=0;c<8;c++){const s=S.b[r][c];if(s&&s.o===p)o.push({r,c,s});}return o;}
+const nobleStacks=(S,p)=>stacks(S,p).filter(x=>x.s.t==='noble');
+const nobleUnits=(S,p)=>nobleStacks(S,p).reduce((a,x)=>a+x.s.n,0);
+const tradeRoom=(S,p)=>(S.rules&&S.rules.tradeCap)?S.rules.tradeCap-nobleUnits(S,p):99; // Δ-15: trades into nobles may not leave you above 4 nobles (king = 2)
+const campCount=(S,p)=>S.camp[p].reduce((a,n)=>a+n,0);
+const pieceCount=(S,p)=>stacks(S,p).reduce((a,x)=>a+x.s.n,0)+campCount(S,p);
+const graveKnights=(S,p)=>S.grave.w[p].knight+S.grave.b[p].knight;
+function takeKnight(S,p){if(S.grave[opp(p)][p].knight>0)S.grave[opp(p)][p].knight--;else S.grave[p][p].knight--;}
+const mkG=()=>({w:{knight:0,noble:0,wizard:0,tower:0},b:{knight:0,noble:0,wizard:0,tower:0}});
+const openBack=(S,p)=>{const r=backRow(p),o=[];for(let c=0;c<8;c++)if(!S.b[r][c])o.push(c);return o;};
+function findId(S,id){for(let r=0;r<8;r++)for(let c=0;c<8;c++){const s=S.b[r][c];if(s&&s.id===id)return{r,c,s};}return null;}
+
+/* ===================== STATE ===================== */
+function newState(){
+  const b=[...Array(8)].map(()=>Array(8).fill(null));let id=1;
+  const put=(r,c,o,t)=>{b[r][c]={id:id++,o,t,n:1};};
+  for(let c=0;c<8;c++){
+    put(7,c,'w',(c===3||c===4)?'noble':'knight');put(6,c,'w','knight');
+    put(0,c,'b',(c===3||c===4)?'noble':'knight');put(1,c,'b','knight');
+  }
+  return{b,nextId:id,turn:'w',actionsLeft:1,first:{w:true,b:true},used:{},frozen:{},
+    camp:{w:[0,0,0,0,0,0,0,0],b:[0,0,0,0,0,0,0,0]},mode:{ai:{w:null,b:null},minutes:0},rules:{pairRecruit:false,tradeCap:4,turnLimit:0,artifacts:true,hints:true},landed:{},clock:null,campNote:{w:[0,0,0,0,0,0,0,0],b:[0,0,0,0,0,0,0,0]},grave:{w:mkG(),b:mkG()},reserve:{w:2,b:2},
+    art:{w:null,b:null},artUsed:{w:false,b:false},flankTurn:false,flankCount:0,shield:{},berserk:null,marched:{},
+    phase:'setup',picker:'b',winner:null,result:'',log:[],turnNo:1};
+}
+
+/* ===================== MOVE GEOMETRY ===================== */
+function dest(S,mv,r,c,o){
+  const t=S.b[r][c],p=mv.o;
+  if(!t)return o.empty?'move':null;
+  if(t.o===p){
+    if(o.stk&&!S.first[p]&&mv.n===1&&t.n===1&&t.t===mv.t&&!S.frozen[t.id]&&!(S.landed&&(S.landed[t.id]||S.landed[mv.id])))return 'stack';
+    if(isPortal(t,p)&&t.id!==mv.id)return 'portal';
+    return null;
+  }
+  if(!o.cap||S.shield[t.id])return null;
+  if(t.t==='tower')return (mv.t==='wizard'&&mv.n===2)?'destroy':null;
+  return 'capture';
+}
+function pieceMoves(S,r,c,via){
+  const s=S.b[r][c],p=s.o,f=fwd(p),out=[];
+  const add=(rr,cc,o)=>{if(!inB(rr,cc))return false;const m=dest(S,s,rr,cc,o);if(m)out.push({to:[rr,cc],mode:m});return !S.b[rr][cc];};
+  const slide=(dirs,max,o)=>{for(const[dr,dc]of dirs)for(let k=1;k<=max;k++){const rr=r+dr*k,cc=c+dc*k;if(!inB(rr,cc))break;if(!add(rr,cc,o))break;}};
+  if(via==='flank'){for(const dc of[-1,1])add(r,c+dc,{empty:true,stk:true,cap:false});return out;}
+  if(via==='banner'){slide(DIAG,3,{empty:true,cap:true,stk:false});return out;}
+  if(s.t==='knight'&&s.n===1){
+    add(r+f,c,{empty:true,stk:true,cap:false});
+    if(homeRows(p).includes(r)&&inB(r+f,c)&&!S.b[r+f][c])add(r+2*f,c,{empty:true,stk:true,cap:false});
+    for(const dc of[-1,1])add(r+f,c+dc,{empty:false,stk:true,cap:true});
+    add(r-f,c,{empty:true,stk:true,cap:false});
+  }else if(s.t==='knight')slide(DIAG,3,{empty:true,cap:true});
+  else if(s.t==='noble'&&s.n===1)slide(ORTH,3,{empty:true,cap:true,stk:true});
+  else if(s.t==='noble')slide(ALL8,1,{empty:true,cap:true});
+  else if(s.t==='wizard')for(const[dr,dc]of LJ)add(r+dr,c+dc,{empty:true,cap:true,stk:true});
+  return out;
+}
+function portalOptions(S,r,c,tr,tc){
+  const sr=tr+Math.sign(r-tr),sc=tc+Math.sign(c-tc);
+  if(!inB(sr,sc))return[];
+  const free=(x,y)=>!S.b[x][y]||(x===r&&y===c);
+  if(!free(sr,sc))return[];
+  const out=[];
+  for(const[a,b]of ALL8){const er=tr+a,ec=tc+b;if(!inB(er,ec)||(er===sr&&ec===sc))continue;if(free(er,ec))out.push({exit:[er,ec],shift:[sr,sc]});}
+  return out;
+}
+function attacked(S,p){ // squares side p could capture with one action
+  const set=new Set();
+  for(const{r,c,s}of stacks(S,p)){
+    if(s.t==='tower')continue;
+    for(const m of pieceMoves(S,r,c,'normal'))if(m.mode==='capture'||m.mode==='destroy')set.add(m.to[0]*8+m.to[1]);
+    if(s.t==='wizard'){const tr=r+fwd(p);if(inB(tr,c)){const t=S.b[tr][c];if(t&&t.o!==p&&!S.shield[t.id]&&(t.t!=='tower'||s.n===2))set.add(tr*8+c);}}
+  }
+  return set;
+}
+const checkApplies=(S,p)=>nobleStacks(S,p).length===1;
+function inDanger(S,p){const ns=nobleStacks(S,p);if(ns.length!==1)return false;return attacked(S,opp(p)).has(ns[0].r*8+ns[0].c);}
+function dbl(S,s){
+  const p=s.o;
+  if(s.t==='noble'&&s.n===2)return true;
+  const st=stacks(S,p),nob=st.filter(x=>x.s.t==='noble');
+  if(s.t==='knight'&&s.n===1&&st.length===2&&campCount(S,p)===0&&nob.length===1&&nob[0].s.n===1)return true;
+  return false;
+}
+function canMove(S,s){if(S.frozen[s.id]||s.t==='tower')return false;const u=S.used[s.id];if(!u)return true;if(u.x)return false;return u.m===0||(u.m===1&&dbl(S,s));}
+function fresh(S,s){const u=S.used[s.id];return !S.frozen[s.id]&&(!u||(!u.x&&u.m===0));}
+function bCaps(S,r,c){const s=S.b[r][c],f=fwd(s.o),o=[];for(const dc of[-1,1]){const tr=r+f,tc=c+dc;if(!inB(tr,tc))continue;const t=S.b[tr][tc];if(t&&t.o!==s.o&&t.t!=='tower'&&!S.shield[t.id])o.push([tr,tc]);}return o;}
+
+/* ===================== ACTION GENERATION ===================== */
+function expandMoves(S,A,r,c,list,k){
+  for(const m of list){
+    if(m.mode==='portal'){for(const pa of portalOptions(S,r,c,m.to[0],m.to[1]))A.push({k,from:[r,c],tower:m.to,exit:pa.exit,shift:pa.shift,mode:'portal',cost:1});}
+    else A.push({k,from:[r,c],to:m.to,mode:m.mode,cost:1});
+  }
+}
+function gen(S){
+  const p=S.turn,A=[];
+  if(S.phase!=='play'||S.winner)return A;
+  if(S.berserk){const f=findId(S,S.berserk.id);if(f&&f.s.t==='knight')for(const to of bCaps(S,f.r,f.c))A.push({k:'bstep',from:[f.r,f.c],to,cost:0});A.push({k:'bstop',cost:0});return A;}
+  if(S.actionsLeft<=0)return A;
+  const L=S.actionsLeft;
+  for(const{r,c,s}of stacks(S,p)){
+    if(canMove(S,s))expandMoves(S,A,r,c,pieceMoves(S,r,c,'normal'),'move');
+    if(fresh(S,s)){
+      if(s.t==='wizard'){const tr=r+fwd(p);if(inB(tr,c)){const t=S.b[tr][c];if(t&&t.o!==p&&!S.shield[t.id]&&(t.t!=='tower'||s.n===2))A.push({k:'ranged',from:[r,c],to:[tr,c],cost:1});}}
+      if(s.t==='knight'&&s.n===1){const f=fwd(p),mr=r+f,lr=r+2*f;if(inB(mr,c)&&inB(lr,c)){const mid=S.b[mr][c],land=S.b[lr][c];if(mid&&mid.o===p&&mid.t==='knight'&&mid.n===1&&!land){const cost=(homeRows(p).includes(r)&&!(S.marched&&S.marched[s.id]))?1:2;if(L>=cost)A.push({k:'front',from:[r,c],to:[lr,c],mode:'move',cost});}}}
+      if(s.t==='tower'&&s.n===2)for(const[a,b]of ALL8){const tr=r+a,tc=c+b;if(!inB(tr,tc))continue;const t=S.b[tr][tc];if(t&&t.o===p)A.push({k:'relay',from:[r,c],to:[tr,tc],cost:1});}
+      if(s.n===2&&s.t!=='tower')for(const[a,b]of ALL8){const er=r+a,ec=c+b;if(inB(er,ec)&&!S.b[er][ec]){A.push({k:'unstack',from:[r,c],to:[er,ec],cost:1});if(s.t==='wizard')A.push({k:'unstackT',from:[r,c],to:[er,ec],cost:1});}}
+      if(s.t==='knight'&&s.n===2&&(p==='w'?r<=3:r>=4)){const tc=S.rules&&S.rules.trade2?2:1;if(L>=tc&&tradeRoom(S,p)>=1)A.push({k:'cavnoble',at:[r,c],cost:tc});}
+      if(s.t==='noble'&&s.n===1&&S.reserve[p]>0&&nobleUnits(S,p)>1)A.push({k:'totower',at:[r,c],cost:1});
+      if((s.t==='wizard'||(s.t==='tower'&&s.n===1))&&tradeRoom(S,p)>=((s.t==='wizard'&&s.n===2)?2:1))A.push({k:'tonoble',at:[r,c],cost:1});
+      if(s.t==='tower'||s.t==='wizard')A.push({k:'flip',at:[r,c],cost:1});
+    }
+  }
+  if(graveKnights(S,p)>0&&!S.recruitedTurn)for(let c=0;c<8;c++)if((S.rules&&S.rules.pairRecruit?S.camp[p][c]<2:S.camp[p][c]===0)&&!S.b[backRow(p)][c])A.push({k:'recruit',file:c,cost:1}); // proposed rule: one recruit per camp square (no cavalry pairs) except via Sellswords
+  const art=S.art[p];
+  if(art&&!S.first[p]&&(!S.artUsed[p]||(art==='flank'&&S.flankTurn&&S.flankCount<2)))genArt(S,A,art,p,L);
+  return A;
+}
+function genArt(S,A,art,p,L){
+  const o=opp(p),half=p==='w'?[4,5,6,7]:[0,1,2,3],mine=stacks(S,p),theirs=stacks(S,o);
+  if(art==='archers')for(const{r,c,s}of theirs)if(s.t==='knight'&&half.includes(r)&&!S.shield[s.id]&&L>=s.n)A.push({k:'archers',to:[r,c],cost:s.n});
+  if(art==='golem'&&L>=2)for(const{r,c,s}of mine)if(s.t==='tower'&&s.n===1)for(const[a,b]of ALL8){const tr=r+a,tc=c+b;if(!inB(tr,tc))continue;const t=S.b[tr][tc];if(!t)A.push({k:'golem',from:[r,c],to:[tr,tc],mode:'move',cost:2});else if(t.o===o&&!S.shield[t.id])A.push({k:'golem',from:[r,c],to:[tr,tc],mode:t.t==='tower'?'destroy':'capture',cost:2});}
+  if(art==='decree'&&L>=2)for(const{r,c,s}of mine)if(s.t==='knight'&&s.n===1)A.push({k:'decree',to:[r,c],cost:2});
+  if(art==='banner')for(const{r,c,s}of mine)if(s.t==='knight'&&s.n===1&&canMove(S,s))expandMoves(S,A,r,c,pieceMoves(S,r,c,'banner'),'banner');
+  if(art==='sellswords'){const gk=graveKnights(S,p);if(gk>0&&freeCamp(S,p)>0)for(const acts of[1,2])if(L>=acts&&(acts===1||gk>2)){A.push({k:'sell',acts,pairs:false,cost:acts});if(gk>=2)A.push({k:'sell',acts,pairs:true,cost:acts});}}
+  if(art==='berserker'&&L>=2)for(const{r,c,s}of mine)if(s.t==='knight'&&s.n===1&&canMove(S,s))for(const to of bCaps(S,r,c))A.push({k:'berserk',from:[r,c],to,cost:2});
+  if(art==='keg'&&L>=2)for(const{r,c,s}of mine)if(s.t==='knight')for(const[a,b]of ALL8){const tr=r+a,tc=c+b;if(!inB(tr,tc))continue;const t=S.b[tr][tc];if(t&&t.o===o&&t.t==='tower'&&!S.shield[t.id])A.push({k:'keg',from:[r,c],to:[tr,tc],cost:2});}
+  if(art==='blink')for(const x of mine)if(x.s.t==='tower'||(x.s.t==='wizard'&&x.s.n===2))for(const y of mine)if(y.s!==x.s)A.push({k:'blink',from:[x.r,x.c],to:[y.r,y.c],cost:1});
+  if(art==='flank')for(const{r,c,s}of mine)if(s.t==='knight'&&canMove(S,s))expandMoves(S,A,r,c,pieceMoves(S,r,c,'flank'),'flank');
+  if(art==='shield')for(const{r,c,s}of mine)if(!S.shield[s.id])A.push({k:'shield',to:[r,c],cost:1});
+}
+
+/* ===================== APPLY ===================== */
+function capture(S,p,x){const t=S.b[x[0]][x[1]];S.grave[p][t.o][t.t]+=t.n;delete S.shield[t.id];S.b[x[0]][x[1]]=null;return t;}
+function promote(S){
+  const msgs=[];
+  for(const p of['w','b']){const r=backRow(opp(p));for(let c=0;c<8;c++){const s=S.b[r][c];if(s&&s.o===p&&s.t==='knight'&&s.n===1){s.t='noble';msgs.push(`${NAME[p]} knight on ${sq(r,c)} promotes to Noble`);}}}
+  return msgs;
+}
+function checkEnd(S){
+  if(S.winner)return;
+  for(const p of[S.turn,opp(S.turn)]){if(nobleUnits(S,p)===0){S.winner=opp(p);S.result=`${NAME[opp(p)]} wins — every ${NAME[p]} noble has been captured.`;return;}}
+  const lone=p=>{const st=stacks(S,p);return st.length===1&&st[0].s.t==='noble'&&st[0].s.n===1&&campCount(S,p)===0;};
+  if(lone('w')&&lone('b')){S.winner='draw';S.result='Stalemate — each side has only a single noble. The game is a draw.';}
+}
+function freeCamp(S,p){let n=0;for(let c=0;c<8;c++)if(S.camp[p][c]===0&&!S.b[backRow(p)][c])n++;return n;}
+function sellUnits(S,a){const want=Math.min(a.acts*2,graveKnights(S,S.turn));const u=[];if(a.pairs){for(let k=0;k+2<=want;k+=2)u.push(2);if(want%2)u.push(1);}else for(let k=0;k<want;k++)u.push(1);return u.slice(0,freeCamp(S,S.turn));}
+function autoFiles(S,p,units){const cap=S.camp[p].slice(),order=[3,4,2,5,1,6,0,7],out=[],r=backRow(p);
+  for(const u of units){const f=order.find(c=>cap[c]===0&&!S.b[r][c]);if(f===undefined){out.push(null);continue;}cap[f]+=u;out.push(f);}return out;}
+function apply(S,a){
+  const p=S.turn,o=opp(p),B=S.b;let t='';
+  const at=x=>B[x[0]][x[1]];
+  const use=(s,kind)=>{const u=S.used[s.id]||(S.used[s.id]={m:0,x:false});if(kind==='m')u.m++;else u.x=true;};
+  const set=(x,v)=>{B[x[0]][x[1]]=v;};
+  const march=s=>{if(s&&s.t==='knight'&&s.n===1){(S.marched||(S.marched={}))[s.id]=1;}};
+  switch(a.k){
+  case'move':case'banner':case'flank':{
+    const s=at(a.from),pre=a.k==='banner'?'[War Banner] ':a.k==='flank'?'[Flank] ':'',nm=pname(s);
+    if(a.mode==='portal'){const tw=at(a.tower);set(a.from,null);set(a.tower,null);set(a.exit,s);set(a.shift,tw);use(s,'m');march(s);
+      t=`${pre}Tower Shift: ${nm} ${sq(...a.from)} passes through ${pname(tw)} ${sq(...a.tower)} to ${sq(...a.exit)}; ${pname(tw)} shifts to ${sq(...a.shift)}`;}
+    else if(a.mode==='stack'){const ns={id:S.nextId++,o:p,t:s.t,n:2};set(a.from,null);set(a.to,ns);S.frozen[ns.id]=1;t=`${pre}${nm} ${sq(...a.from)} stacks onto ${sq(...a.to)} → ${pname(ns)}`;}
+    else{let cap='';if(at(a.to)){const v=capture(S,p,a.to);cap=a.mode==='destroy'?' — destroys enemy Tower':` — captures ${pname(v)}`;}set(a.from,null);set(a.to,s);use(s,'m');march(s);t=`${pre}${nm} ${sq(...a.from)}→${sq(...a.to)}${cap}`;}
+    if(a.k!=='move')S.artUsed[p]=true;
+    if(a.k==='flank'){S.flankTurn=true;S.flankCount++;}
+    break;}
+  case'ranged':{const s=at(a.from),v=capture(S,p,a.to);use(s,'x');t=`${pname(s)} ${sq(...a.from)} ${p==='b'?'hurls a fireball':'calls lightning'} at ${sq(...a.to)} — ${v.t==='tower'?'destroys enemy Tower':'captures '+pname(v)}`;break;}
+  case'unstack':case'unstackT':{const s=at(a.from),nm=pname(s);const bot={id:S.nextId++,o:p,t:s.t,n:1},top={id:S.nextId++,o:p,t:a.k==='unstackT'?'tower':s.t,n:1};
+    set(a.from,bot);set(a.to,top);S.frozen[bot.id]=1;S.frozen[top.id]=1;t=`${nm} ${sq(...a.from)} unstacks; top ${pname(top)} placed on ${sq(...a.to)}`;break;}
+  case'cavnoble':{const s=at(a.at);S.grave[p][p].knight++;const ns={id:S.nextId++,o:p,t:'noble',n:1};set(a.at,ns);S.frozen[ns.id]=1;t=`Promotion: Cavalry ${sq(...a.at)} becomes a Noble (top knight sacrificed)`;break;}
+  case'totower':{S.reserve[p]--;const ns={id:S.nextId++,o:p,t:'tower',n:1};set(a.at,ns);S.frozen[ns.id]=1;t=`Noble ${sq(...a.at)} traded for a Wizard Tower`;break;}
+  case'tonoble':{const s=at(a.at),nm=pname(s),units=(s.t==='wizard'&&s.n===2)?2:1;S.reserve[p]+=units;const ns={id:S.nextId++,o:p,t:'noble',n:units};set(a.at,ns);S.frozen[ns.id]=1;t=`Restore: ${nm} ${sq(...a.at)} → ${pname(ns)} (tower${units>1?'s':''} return to reserve)`;break;}
+  case'flip':{const s=at(a.at),nm=pname(s);const ns={id:S.nextId++,o:p,t:s.t==='tower'?'wizard':'tower',n:s.n===2?2:1};set(a.at,ns);S.frozen[ns.id]=1;t=`${nm} ${sq(...a.at)} flips → ${pname(ns)}`;break;}
+  case'front':{const s=at(a.from);set(a.from,null);set(a.to,s);use(s,'m');march(s);t=`Front Line: ${pname(s)} ${sq(...a.from)} jumps to ${sq(...a.to)}`;break;}
+  case'relay':{const x=at(a.from),y=at(a.to);set(a.from,y);set(a.to,x);use(x,'m');t=`${pname(x)} ${sq(...a.from)} swaps with ${pname(y)} ${sq(...a.to)}`;break;}
+  case'archers':{const v=capture(S,p,a.to);S.artUsed[p]=true;t=`[Hidden Archers] shoot ${pname(v)} on ${sq(...a.to)}`;break;}
+  case'golem':{const tw=at(a.from);let cap='';if(at(a.to)){const v=capture(S,p,a.to);cap=v.t==='tower'?' — destroys enemy Tower':` — captures ${pname(v)}`;}set(a.from,null);set(a.to,tw);S.artUsed[p]=true;t=`[Stone Golem] Tower ${sq(...a.from)}→${sq(...a.to)}${cap}`;break;}
+  case'decree':{const s=at(a.to);s.t='noble';S.artUsed[p]=true;t=`[Royal Decree] Knight ${sq(...a.to)} promoted to Noble`;break;}
+  case'sell':{const units=sellUnits(S,a);
+    const files=a.files&&a.files.length===units.length?a.files:autoFiles(S,p,units);const placed=[];
+    units.forEach((u,ix)=>{const f=files[ix];if(f===undefined||f===null)return;for(let k=0;k<u;k++)takeKnight(S,p);S.camp[p][f]+=u;placed.push(`${u===2?'Cavalry':'Knight'}→${FILES[f]}`);});
+    S.artUsed[p]=true;t=`[Sellswords] recruit to camp: ${placed.join(', ')}`;break;}
+  case'berserk':case'bstep':{const s=at(a.from),v=capture(S,p,a.to);set(a.from,null);set(a.to,s);use(s,'m');march(s);if(a.k==='berserk'){S.artUsed[p]=true;S.berserk={id:s.id};}
+    t=`[Berserker] Knight ${sq(...a.from)}→${sq(...a.to)} — captures ${pname(v)}`;break;}
+  case'bstop':S.berserk=null;t='[Berserker] stops';break;
+  case'keg':{const s=at(a.from);S.grave[p][p].knight+=s.n;set(a.from,null);capture(S,p,a.to);S.artUsed[p]=true;t=`[Powder Keg] ${pname(s)} ${sq(...a.from)} sacrificed — enemy Tower ${sq(...a.to)} destroyed`;break;}
+  case'blink':{const x=at(a.from),y=at(a.to);set(a.from,y);set(a.to,x);use(y,'x');S.artUsed[p]=true;t=`[Blink Rune] ${pname(x)} ${sq(...a.from)} swaps with ${pname(y)} ${sq(...a.to)}`;break;}
+  case'shield':{const s=at(a.to);S.shield[s.id]=p;S.artUsed[p]=true;t=`[Shield Wall] ${pname(s)} ${sq(...a.to)} shielded until ${NAME[p]}'s next turn`;break;}
+  }
+  S.actionsLeft-=a.cost;
+  if(S.actionsLeft>0){for(let r=0;r<8;r++)for(let c=0;c<8;c++){const ks=S.b[r][c];if(ks&&ks.o===p&&ks.t==='noble'&&ks.n===2)delete S.frozen[ks.id];}}
+  const pm=promote(S);
+  if(S.berserk){const f=findId(S,S.berserk.id);if(!f||f.s.t!=='knight'||bCaps(S,f.r,f.c).length===0)S.berserk=null;}
+  checkEnd(S);
+  return [t,...pm].join(' · ');
+}
+function legalActions(S){
+  const p=S.turn;
+  return gen(S).filter(a=>{
+    const noblesBefore=nobleStacks(S,p).length;
+    const T=clone(S);apply(T,a);
+    if(T.winner===p)return true;
+    const leavesDanger=checkApplies(T,p)&&inDanger(T,p);
+    if(!leavesDanger)return true;
+    // A noble may become a tower while any other noble of yours remains anywhere on the board.
+    // If that leaves the other one in danger, a later action this turn must be able to save it.
+    if(a.k==='totower'&&noblesBefore>1&&T.actionsLeft>0&&legalActions(T).length>0)return true;
+    return false;
+  });
+}
+
+/* ===================== TURN FLOW ===================== */
+function startTurn(S){
+  const p=S.turn;S.used={};S.frozen={};S.landed={};S.recruitedTurn=0;S.arrivals=[];S.flankTurn=false;S.flankCount=0;S.berserk=null;
+  for(const id in S.shield)if(S.shield[id]===p)delete S.shield[id];
+  S.actionsLeft=S.first[p]?1:2;
+  S.phase='play';
+  const r=backRow(p);
+  for(let c=0;c<8;c++){const n=S.camp[p][c];if(!n)continue;
+    if(!S.campNote)S.campNote={w:[0,0,0,0,0,0,0,0],b:[0,0,0,0,0,0,0,0]};
+    if(!S.b[r][c]){const nk={id:S.nextId++,o:p,t:'knight',n};S.b[r][c]=nk;S.landed[nk.id]=1;S.arrivals.push([r,c]);S.camp[p][c]=0;S.campNote[p][c]=0;S.log.push(`T${S.turnNo} ${NAME[p]}: camp ${n===2?'Cavalry':'Knight'} lands on ${sq(r,c)}`);}
+    else S.log.push(`T${S.turnNo} ${NAME[p]}: camp square ${FILES[c]} is blocked — recruit waits until ${sq(r,c)} is clear`);}
+  evalStart(S);
+}
+function evalStart(S){
+  checkEnd(S);if(S.winner)return;
+  const p=S.turn;
+  if(checkApplies(S,p)&&inDanger(S,p)&&legalActions(S).length===0){S.winner=opp(p);S.result=`Checkmate — ${NAME[p]}'s last noble cannot escape danger. ${NAME[opp(p)]} wins.`;}
+}
+function placeCamp(S,i,c){
+  const p=S.turn,e=S.camp[p].splice(i,1)[0];const r=backRow(p);
+  const np={id:S.nextId++,o:p,t:'knight',n:e.n};S.b[r][c]=np;S.frozen[np.id]=1;
+  S.log.push(`T${S.turnNo} ${NAME[p]}: camp ${e.n===2?'Cavalry':'Knight'} arrives on ${sq(r,c)} (frozen until next turn)`);
+  if(!S.camp[p].length||!openBack(S,p).length){S.phase='play';evalStart(S);}
+}
+function posKey(S){return S.b.map(r=>r.map(x=>x?x.o+x.t[0]+x.n:'.').join('')).join('/')+S.turn;}
+function endTurn(S){S.recent=(S.recent||[]).concat(posKey(S)).slice(-16);S.first[S.turn]=false;S.turn=opp(S.turn);S.turnNo++;
+  if(S.rules&&S.rules.turnLimit&&S.turnNo>S.rules.turnLimit&&!S.winner){const nw=nobleUnits(S,'w'),nb=nobleUnits(S,'b');S.winner=nw>nb?'w':nb>nw?'b':'draw';S.result=`Turn limit (${S.rules.turnLimit}) reached — nobles left: White ${nw}, Black ${nb}. `+(S.winner==='draw'?'Draw.':`${NAME[S.winner]} wins with more nobles.`);return;}
+  startTurn(S);}
+
+/* ===================== PIECE ART ===================== */
+function pieceName(s){return s.t==='knight'?(s.n===2?'cavalry':'knight'):s.t==='noble'?(s.n===2?'king':'noble'):s.t==='wizard'?(s.n===2?'archmage':'wizard'):'tower';}
+function pieceFile(s){
+  const folder=prefs.piece==='woodhelm'?'woodhelm':'woodcut';
+  return `art/sprites/${folder}/${s.o}-${pieceName(s)}.png`;
+}
+function pieceSVG(s,cls='pc'){
+  if(prefs.piece==='woodcut'||prefs.piece==='woodhelm')return `<img class="${cls}" src="${pieceFile(s)}" alt="" draggable="false">`;
+  return carvedSVG(s,cls);
+}
+
+/* ===================== COMPUTER OPPONENT ===================== */
+const VAL={knight:[1,3],noble:[5,7],wizard:[5,6],tower:[5,5]}; // the computer's private piece weights for judging positions (not a player-facing points system)
+const val=s=>VAL[s.t][s.n-1];
+const ART_KEEP={easy:0.3,medium:1.5,hard:2.5}; // value of still holding the artifact: higher = waits for a stronger moment
+const CAPK=['ranged','archers','golem','berserk','bstep','keg'];
+function cover(S,r,c){ // squares this piece could capture on if an enemy stood there
+  const s=S.b[r][c],p=s.o,f=fwd(p),o=[];
+  const slide=(dirs,max)=>{for(const[dr,dc]of dirs)for(let k=1;k<=max;k++){const rr=r+dr*k,cc=c+dc*k;if(!inB(rr,cc))break;o.push(rr*8+cc);if(S.b[rr][cc])break;}};
+  if(s.t==='knight'&&s.n===1){for(const dc of[-1,1])if(inB(r+f,c+dc))o.push((r+f)*8+c+dc);}
+  else if(s.t==='knight')slide(DIAG,3);
+  else if(s.t==='noble'&&s.n===1)slide(ORTH,3);
+  else if(s.t==='noble')slide(ALL8,1);
+  else if(s.t==='wizard'){for(const[dr,dc]of LJ)if(inB(r+dr,c+dc))o.push((r+dr)*8+c+dc);if(inB(r+f,c))o.push((r+f)*8+c);}
+  return o;
+}
+function coverInfo(S,p){const m=new Map();let mob=0;for(const{r,c,s}of stacks(S,p)){if(s.t==='tower')continue;const v=val(s),cv=cover(S,r,c);mob+=cv.length;for(const k of cv)if(!m.has(k)||m.get(k)>v)m.set(k,v);}return{m,mob};}
+const coverMap=(S,p)=>coverInfo(S,p).m;
+function evalS(S,me,level='hard'){
+  if(S.winner)return S.winner===me?1e6:S.winner==='draw'?0:-1e6;
+  const pos=level!=='easy';
+  const CI={w:coverInfo(S,'w'),b:coverInfo(S,'b')};
+  const next=(S.actionsLeft>0||S.berserk)?S.turn:opp(S.turn);
+  let sc=0;
+  for(const p of['w','b']){
+    const sg=p===me?1:-1,o=opp(p),mine=stacks(S,p),theirs=stacks(S,o),atk=CI[o].m,def=CI[p].m;
+    for(const{r,c,s}of mine){
+      let v=val(s);
+      if(pos){
+        const adv=p==='w'?7-r:r;
+        if(s.t==='knight'){
+          v+=0.08*adv*s.n;
+          if(s.n===1){const f=fwd(p);let passed=true;for(const x of theirs)if(Math.abs(x.c-c)<=1&&(x.r-r)*f>0){passed=false;break;}if(passed)v+=0.5*adv/6;if(adv===6)v+=1.2;}
+        }
+        if(r>=2&&r<=5&&c>=2&&c<=5&&s.t!=='tower')v+=0.12;
+        if(S.shield[s.id])v+=0.3;
+      }
+      sc+=sg*v;
+    }
+    sc+=sg*(0.9*campCount(S,p)+0.6*S.reserve[p]+0.15*graveKnights(S,p)+(S.art[p]&&!S.artUsed[p]?ART_KEEP[level]:0));
+    if(pos){
+      sc+=sg*0.03*CI[p].mob;
+      const en=nobleStacks(S,o);
+      if(en.length)for(const{r,c,s}of mine){if(s.t==='tower')continue;const d=Math.min(...en.map(n=>Math.max(Math.abs(n.r-r),Math.abs(n.c-c))));sc+=sg*0.07*(7-d);}
+      // noble safety and pressure: the real objective
+      const ns=nobleStacks(S,p),single=ns.length===1;
+      for(const n of ns){
+        const k=n.r*8+n.c;let near=0,guards=0;
+        for(const x of theirs)if(Math.max(Math.abs(x.r-n.r),Math.abs(x.c-n.c))<=2)near++;
+        for(const x of mine)if(x.s!==n.s&&Math.max(Math.abs(x.r-n.r),Math.abs(x.c-n.c))<=1)guards++;
+        let pen=0.3*near-0.15*Math.min(guards,3);
+        if(atk.has(k)&&!S.shield[n.s.id])pen+=(single?4:1.2*n.s.n)*(def.has(k)?0.6:1);
+        if(single){let esc=0;for(const mv of pieceMoves(S,n.r,n.c,'normal'))if(!atk.has(mv.to[0]*8+mv.to[1]))esc++;pen+=esc===0?2.5:-0.2*Math.min(esc,5);pen+=1.5;}
+        sc-=sg*pen;
+      }
+    }else if(nobleUnits(S,p)===1)sc-=sg*3;
+    // hanging pieces, weighted by who moves next
+    const losses=[];
+    for(const{r,c,s}of mine){
+      const k=r*8+c;if(S.shield[s.id]||(pos&&s.t==='noble'))continue;
+      if(s.t==='tower'){if(!theirs.some(x=>x.s.t==='wizard'&&x.s.n===2&&cover(S,x.r,x.c).includes(k)))continue;}
+      if(!atk.has(k))continue;
+      const loss=val(s)-(def.has(k)?atk.get(k):0);if(loss>0)losses.push(loss);
+    }
+    losses.sort((a,b)=>b-a);
+    const w1=next===o?0.9:0.25,w2=next===o?0.5:0.1;
+    sc-=sg*((losses[0]||0)*w1+(losses[1]||0)*w2);
+  }
+  return sc;
+}
+function afterVal(S,a,me,level){const T=clone(S);apply(T,a);return{T,a,v:evalS(T,me,level)};}
+function quickScore(S,a,side){ // cheap ordering of replies: captures first (nobles above all), then moves closing in on enemy nobles
+  let v=0;const tgt=a.to&&S.b[a.to[0]]&&S.b[a.to[0]][a.to[1]];
+  if(tgt&&tgt.o!==side&&(a.mode==='capture'||a.mode==='destroy'||CAPK.includes(a.k)))v+=10*val(tgt)+(tgt.t==='noble'?40:0);
+  if(a.from&&a.to&&!tgt){const en=nobleStacks(S,opp(side));if(en.length){const d=x=>Math.min(...en.map(n=>Math.max(Math.abs(n.r-x[0]),Math.abs(n.c-x[1]))));v+=0.8*(d(a.from)-d(a.to));}}
+  return v;
+}
+function replyValue(T,me){ // opponent answers with its best reply turn (up to 2 actions); value from me's side (worst case)
+  if(T.winner)return evalS(T,me,'hard');
+  const R=clone(T);R.berserk=null;if(R.turn===me){R.first[me]=false;R.turn=opp(me);R.turnNo++;startTurn(R);}
+  if(R.winner)return evalS(R,me,'hard');
+  const side=R.turn;
+  const pick=(X,n)=>gen(X).filter(a=>a.k!=='bstop').map(a=>({a,q:quickScore(X,a,side)})).sort((x,y)=>y.q-x.q).slice(0,n).map(x=>x.a);
+  let worst=evalS(R,me,'hard');
+  for(const a1 of pick(R,6)){
+    const T1=clone(R);apply(T1,a1);let g=0;while(T1.berserk&&g++<6){const st=gen(T1).find(x=>x.k==='bstep');if(!st)break;apply(T1,st);}T1.berserk=null;
+    let v=evalS(T1,me,'hard');
+    if(!T1.winner&&T1.actionsLeft>0)for(const a2 of pick(T1,4)){const T2=clone(T1);apply(T2,a2);T2.berserk=null;v=Math.min(v,evalS(T2,me,'hard'));}
+    worst=Math.min(worst,v);
+  }
+  return worst;
+}
+function repPen(S,T){const k=posKey(T);return (S.recent||[]).filter(x=>x===k).length*2.5;}
+function botChoose(S,level){
+  const me=S.turn,L=legalActions(S);
+  if(!L.length)return null;
+  if(level==='easy'){ // mostly grabs points, sometimes careless
+    if(S.berserk)return L.find(a=>a.k==='bstep')||L[0];
+    if(Math.random()<0.3)return L[Math.floor(Math.random()*L.length)];
+    return L.map(a=>({a,v:afterVal(S,a,me,'easy').v+Math.random()*1.5})).sort((x,y)=>y.v-x.v)[0].a;
+  }
+  const sc=L.map(a=>afterVal(S,a,me,level)).sort((x,y)=>y.v-x.v);
+  if(S.berserk)return sc[0].a;
+  if(level==='medium'){ // plans both of its actions together; judges position, noble safety and threats
+    let best=sc[0],bv=-Infinity;
+    for(const c of sc.slice(0,8)){
+      let v=c.v;
+      v-=repPen(S,c.T);
+      if(!c.T.winner&&c.T.actionsLeft>0&&!c.T.berserk)for(const a2 of legalActions(c.T)){const r=afterVal(c.T,a2,me,level);const rv=r.v-repPen(S,r.T);if(rv>v)v=rv;}
+      v+=Math.random()*0.15;
+      if(v>bv){bv=v;best=c;}
+    }
+    return best.a;
+  }
+  // hard: plans both actions, then checks each plan against the opponent's best reply turn
+  let best=sc[0],bv=-Infinity;
+  for(const c of sc.slice(0,8)){
+    let v;
+    if(c.T.winner)v=evalS(c.T,me,level);
+    else{
+      const blend=(T,st)=>0.45*st+0.55*replyValue(T,me)-repPen(S,T); // own plan quality, checked against the opponent's best reply
+      v=blend(c.T,c.v);
+      if(c.T.actionsLeft>0&&!c.T.berserk){
+        const L2=legalActions(c.T).map(a=>afterVal(c.T,a,me,level)).sort((x,y)=>y.v-x.v).slice(0,7);
+        for(const d of L2){const rv=d.T.winner?evalS(d.T,me,level):blend(d.T,d.v);if(rv>v)v=rv;}
+      }
+    }
+    v+=Math.random()*0.1; // slight variety so Hard doesn't replay identical games
+    if(v>bv){bv=v;best=c;}
+  }
+  return best.a;
+}
+const BOT_ART=['archers','berserker','banner','shield','decree','blink','sellswords','flank','keg','golem'];
+function botPickArt(S,level){const free=ART.map(a=>a.id).filter(id=>S.art.w!==id&&S.art.b!==id);if(level==='easy')return free[Math.floor(Math.random()*free.length)];return BOT_ART.find(id=>free.includes(id));}
+let botToken=0;
+function scheduleBot(){
+  const tok=++botToken;
+  if(S.winner||paused)return;
+  if(S.phase==='pick'&&S.mode.ai[S.picker]){setTimeout(()=>{if(tok!==botToken||paused)return;pickArt(botPickArt(S,S.mode.ai[S.picker]));},600);return;}
+  if(S.phase!=='play'||!S.mode.ai[S.turn])return;
+  const level=S.mode.ai[S.turn];
+  setTimeout(()=>{
+    if(tok!==botToken||paused)return;
+    if(S.actionsLeft<=0&&!S.berserk){doEndTurn();return;}
+    const a=botChoose(S,level);
+    if(tok!==botToken)return;
+    if(!a){if(S.berserk){const st=LEG.find(x=>x.k==='bstop');if(st){doAction(st);return;}}doEndTurn();return;}
+    doAction(a);
+  },(S.mode.ai.w&&S.mode.ai.b)?watchDelay:(level==='hard'?350:600));
+}
+const botTurn=()=>!!(S.mode.ai[S.turn]&&S.phase==='play'&&!S.winner);
+let paused=false,watchDelay=900;
+const isAI=p=>!!S.mode.ai[p];
+
+/* ===================== STYLE, ANIMATION, SOUND (Δ-17) ===================== */
+const EMP={w:'Fulgar Empire',b:'Angtapa Empire'},EMPS={w:'Fulgar',b:'Angtapa'};
+function savePrefs(){try{localStorage.setItem('strahtura_prefs15',JSON.stringify(prefs));}catch(e){}}
+// ---- carved pieces, drawn to match the printed helm and crown ----
+function carvedSVG(s,cls){
+  const W=s.o==='w',G=W?'url(#cgW)':'url(#cgB)',K=W?'#3b2a17':'#c9a23a',D=W?'#7a5a2a':'#e7c766',HL=W?'rgba(255,255,255,.6)':'rgba(255,236,190,.22)',SH=W?'rgba(70,45,10,.22)':'rgba(0,0,0,.4)',GEM=W?'#2f6fd6':'#e8601c';
+  const shadow=`<ellipse cx="50" cy="91" rx="23" ry="4" fill="rgba(0,0,0,.28)"/>`;
+  const helm=(dx,dy,k)=>`<g transform="translate(${dx} ${dy}) scale(${k})">${shadow}<path d="M28 88 L30 32 Q30 20 42 19 L58 19 Q70 20 70 32 L72 88 Z" fill="${G}" stroke="${K}" stroke-width="3.5" stroke-linejoin="round"/><path d="M28.4 81 H71.6 L72 88 H28 Z" fill="${SH}"/><path d="M31 40 H46.5 V47 H31 Z M53.5 40 H69 V47 H53.5 Z" fill="${K}"/><rect x="47.5" y="19.5" width="5" height="68" fill="${D}" opacity=".9"/><path d="M33 31 Q34 24.5 40 23.5" stroke="${HL}" stroke-width="3" fill="none" stroke-linecap="round"/><rect x="34" y="51" width="4" height="27" rx="2" fill="${HL}"/></g>`;
+  const crown=(dx,dy,k)=>`<g transform="translate(${dx} ${dy}) scale(${k})">${shadow}<ellipse cx="50" cy="74" rx="21" ry="15" fill="${G}" stroke="${K}" stroke-width="3.5"/><path d="M37 76 Q40 69 47 68.5" stroke="${HL}" stroke-width="2.5" fill="none" stroke-linecap="round"/><g transform="rotate(-7 50 58)"><path d="M25 62 V30 H33 V40 H41 V26 H48 V40 H52 V26 H59 V40 H67 V30 H75 V62 Z" fill="${G}" stroke="${K}" stroke-width="3.5" stroke-linejoin="round"/><rect x="25" y="53" width="50" height="8" fill="${D}"/><circle cx="50" cy="57" r="3.4" fill="${GEM}" stroke="${K}" stroke-width="1"/><rect x="28.5" y="33" width="3" height="18" rx="1.5" fill="${HL}"/></g></g>`;
+  const hat=(dx,dy,k)=>`<g transform="translate(${dx} ${dy}) scale(${k})">${shadow}<ellipse cx="50" cy="80" rx="31" ry="8.5" fill="${G}" stroke="${K}" stroke-width="3.5"/><path d="M33 78 L54 11 Q58 34 67 78 Z" fill="${G}" stroke="${K}" stroke-width="3.5" stroke-linejoin="round"/><path d="M35 70 Q50 75 65 70 L66 76 Q50 81 34 76 Z" fill="${D}"/><path d="M52 44 l3 6 6 1 -5 4 1 6 -5 -3 -5 3 1 -6 -5 -4 6 -1z" fill="${GEM}"/><path d="M45 58 a5 5 0 1 0 4 -7 a4 4 0 1 1 -4 7z" fill="${D}"/><path d="M44 66 L52 20" stroke="${HL}" stroke-width="2.5" stroke-linecap="round"/></g>`;
+  const tower=`${shadow}<path d="M27 88 V40 H33 V29 H43 V40 H57 V29 H67 V40 H73 V88 Z" fill="${G}" stroke="${K}" stroke-width="3.5" stroke-linejoin="round"/><path d="M28 52 H72 M28 64 H72 M28 76 H72 M40 40 V52 M60 40 V52 M34 52 V64 M50 52 V64 M66 52 V64 M40 64 V76 M60 64 V76" stroke="${SH}" stroke-width="1.6"/><path d="M42 88 V73 Q50 63 58 73 V88 Z" fill="${K}"/><path d="M46 46 V56 H54 V46 Q50 42 46 46 Z" fill="${GEM}" opacity=".85"/><rect x="31" y="42" width="3.5" height="40" rx="1.5" fill="${HL}"/>`;
+  let g='';
+  if(s.t==='knight')g=s.n===2?helm(26,4,.74)+helm(6,24,.74):helm(0,0,1);
+  else if(s.t==='noble')g=s.n===2?crown(10,28,.78)+crown(10,-2,.78):crown(0,0,1);
+  else if(s.t==='wizard')g=s.n===2?hat(24,0,.78)+hat(0,18,.78):hat(0,0,1);
+  else g=tower;
+  return `<svg class="${cls}" viewBox="0 0 100 100" aria-hidden="true">${g}</svg>`;
+}
+// ---- sound: generated in the page, no files ----
+let AC=null;
+function ac(){if(!AC){try{AC=new(window.AudioContext||window.webkitAudioContext)();}catch(e){AC=null;}}if(AC&&AC.state==='suspended')AC.resume().catch(()=>{});return AC;}
+document.addEventListener('pointerdown',()=>{if(prefs.sound)ac();syncMusic(true);});
+document.addEventListener('click',e=>{if(e.target.closest('button, a[data-rb], .pick, #mZip'))playFx('click');},true);
+document.addEventListener('change',e=>{if(e.target.matches('select, input[type="checkbox"], input[type="range"]'))playFx('click');},true);
+function tone(f,d,type='sine',vol=.15,when=0,to=null){const a=AC;if(!a)return;const t=a.currentTime+when,o=a.createOscillator(),g=a.createGain();o.type=type;o.frequency.setValueAtTime(f,t);if(to)o.frequency.exponentialRampToValueAtTime(to,t+d);g.gain.setValueAtTime(vol,t);g.gain.exponentialRampToValueAtTime(.001,t+d);o.connect(g).connect(a.destination);o.start(t);o.stop(t+d+.03);}
+function noise(d,vol=.2,freq=1000,type='bandpass',when=0){const a=AC;if(!a)return;const t=a.currentTime+when,n=Math.max(1,Math.floor(a.sampleRate*d)),buf=a.createBuffer(1,n,a.sampleRate),ch=buf.getChannelData(0);for(let i=0;i<n;i++)ch[i]=(Math.random()*2-1)*(1-i/n);const src=a.createBufferSource();src.buffer=buf;const f=a.createBiquadFilter();f.type=type;f.frequency.value=freq;const g=a.createGain();g.gain.value=vol;src.connect(f).connect(g).connect(a.destination);src.start(t);}
+function noiseEnv(d,vol,f0,f1,type='bandpass',att=.02,when=0,Q=1){const a=AC;if(!a)return;const t=a.currentTime+when,n=Math.max(1,Math.floor(a.sampleRate*d)),buf=a.createBuffer(1,n,a.sampleRate),ch=buf.getChannelData(0);for(let i=0;i<n;i++)ch[i]=Math.random()*2-1;const src=a.createBufferSource();src.buffer=buf;const f=a.createBiquadFilter();f.type=type;f.Q.value=Q;f.frequency.setValueAtTime(f0,t);f.frequency.linearRampToValueAtTime(f1,t+d);const g=a.createGain();g.gain.setValueAtTime(0.0001,t);g.gain.linearRampToValueAtTime(vol,t+att);g.gain.linearRampToValueAtTime(vol*.7,t+d*.7);g.gain.linearRampToValueAtTime(0.0001,t+d);src.connect(f).connect(g).connect(a.destination);src.start(t);src.stop(t+d+.02);}
+const SFX={
+  move:()=>{const stone=prefs.board==='marble';const d=stone?.2:.24; // just the slide across the board, fading out softly
+    noiseEnv(d,stone?.12:.15,stone?2600:1300,stone?1900:800,'bandpass',.04,0,stone?1.2:.9);
+    noiseEnv(d,.035,stone?5200:3200,stone?4300:2500,'bandpass',.04,0,2);},
+  capture:()=>{ // a crisp wooden clack with a short bright ring
+    noiseEnv(.035,.55,3600,3000,'bandpass',.002,0,1.4);tone(740,.14,'triangle',.2,0,640);
+    tone(1046,.45,'sine',.08,.05);tone(1568,.5,'sine',.045,.07);tone(2093,.35,'sine',.025,.09);},
+  stack:()=>{noiseEnv(.12,.22,1200,800,'bandpass',.02,0,.9);tone(300,.07,'triangle',.18,.1);tone(420,.07,'triangle',.14,.17);},
+  flip:()=>{tone(660,.14,'sine',.12);tone(990,.3,'sine',.1,.1);},
+  promote:()=>{tone(392,.07,'triangle',.14);tone(523,.08,'triangle',.16,.06);tone(659,.09,'sawtooth',.05,.12);tone(784,.16,'triangle',.15,.16);tone(1046,.22,'triangle',.12,.22);tone(1568,.2,'sine',.05,.24);},
+  wstack:()=>{tone(392,.12,'sine',.22,0);tone(523,.16,'triangle',.2,.08);tone(659,.22,'sine',.18,.14);tone(784,.28,'sine',.16,.2);tone(1175,.32,'triangle',.1,.26);noiseEnv(.4,.06,900,2800,'bandpass',.01,.05,6);},
+  magic:()=>{tone(698,.07,'sine',.07);tone(880,.1,'sine',.06,.06);tone(1175,.16,'sine',.05,.12);noiseEnv(.2,.04,2200,5400,'highpass',.01,0,2);},
+  zap:()=>{noise(.28,.4,3200,'highpass');tone(1400,.22,'sawtooth',.05,0,180);},
+  fire:()=>{noise(.5,.4,520,'lowpass');tone(220,.45,'sine',.12,0,70);},
+  boom:()=>{noise(.7,.55,300,'lowpass');tone(95,.55,'sine',.35,0,38);},
+  recruit:()=>{tone(392,.11,'triangle',.08);tone(523,.16,'triangle',.08,.11);},
+  check:()=>{tone(880,.12,'square',.05);tone(660,.16,'square',.05,.14);},
+  win:()=>{[523,659,784,1046].forEach((f,i)=>tone(f,.32,'triangle',.12,i*.14));}
+};
+function sfx(n){if(!prefs.sound||!ac())return;try{SFX[n]&&SFX[n]();}catch(e){}}
+// ---- animation ----
+const sqEl=x=>document.querySelector(`.sqr[data-r="${x[0]}"][data-c="${x[1]}"]`);
+const rectOf=x=>{const e=sqEl(x);return e?e.getBoundingClientRect():null;};
+const pieceEl=x=>{const e=sqEl(x);return e?e.querySelector('svg.pc, img.pc'):null;};
+function slideFromRect(x,b,dur=290,viaRect=null){const el=pieceEl(x),a=rectOf(x);if(!el||!a||!b)return;const kf=[{transform:`translate(${b.left-a.left}px,${b.top-a.top}px)`}];if(viaRect)kf.push({transform:`translate(${viaRect.left-a.left}px,${viaRect.top-a.top}px) scale(.75)`,opacity:.6});kf.push({transform:'translate(0,0)',opacity:1});el.animate(kf,{duration:dur,easing:'cubic-bezier(.2,.8,.3,1)'});}
+const slideFrom=(x,from,dur,via)=>slideFromRect(x,rectOf(from),dur,via?rectOf(via):null);
+function flipAt(x,delay=0){const el=pieceEl(x);if(!el)return;el.animate([{transform:'perspective(260px) rotateY(90deg) scale(1.12)'},{transform:'perspective(260px) rotateY(0deg) scale(1)'}],{duration:480,delay,easing:'ease-out',fill:'backwards'});}
+function bounce(x,delay=0){const el=pieceEl(x);if(!el)return;el.animate([{transform:'scale(1)'},{transform:'scale(1.18)'},{transform:'scale(1)'}],{duration:260,delay});}
+function fxBox(r,html){const d=document.createElement('div');d.className='fxg';d.style.cssText=`left:${r.left}px;top:${r.top}px;width:${r.width}px;height:${r.height}px`;d.innerHTML=html;$('fx').appendChild(d);return d;}
+function ghost(s,x,delay=0){if(!s)return;const r=rectOf(x);if(!r)return;const d=fxBox(r,pieceSVG(s,'gh'));d.animate([{opacity:1,transform:'scale(1)'},{opacity:0,transform:'scale(.4) translateY(-18px) rotate(-25deg)'}],{duration:540,delay,easing:'ease-in',fill:'both'}).onfinish=()=>d.remove();}
+function burst(x,y,col,size=60){const d=document.createElement('div');d.className='fxg';d.style.cssText=`left:${x-size/2}px;top:${y-size/2}px;width:${size}px;height:${size}px;border-radius:50%;background:radial-gradient(circle,#fff 0,${col} 35%,transparent 70%)`;$('fx').appendChild(d);d.animate([{opacity:1,transform:'scale(.3)'},{opacity:0,transform:'scale(1.4)'}],{duration:420,easing:'ease-out'}).onfinish=()=>d.remove();}
+const ctr=r=>[r.left+r.width/2,r.top+r.height/2];
+function projectile(fromRect,to,kind,done){
+  const b=rectOf(to);if(!fromRect||!b){done&&done();return;}
+  const[ax,ay]=ctr(fromRect),[bx,by]=ctr(b);
+  if(kind==='zap'){
+    const n=7;let pts=[];for(let i=0;i<=n;i++){const t=i/n,j=(i===0||i===n)?0:(Math.random()*2-1)*16;const px=ax+(bx-ax)*t+j*(by-ay)/Math.hypot(bx-ax,by-ay||1),py=ay+(by-ay)*t-j*(bx-ax)/Math.hypot(bx-ax||1,by-ay);pts.push(px.toFixed(1)+','+py.toFixed(1));}
+    const s=document.createElementNS('http://www.w3.org/2000/svg','svg');s.setAttribute('style','position:fixed;left:0;top:0;width:100vw;height:100vh;pointer-events:none');
+    s.innerHTML=`<polyline points="${pts.join(' ')}" fill="none" stroke="#1e3a8a" stroke-width="16" opacity=".35" stroke-linejoin="round"/><polyline points="${pts.join(' ')}" fill="none" stroke="#6fb4ff" stroke-width="9" opacity=".85" stroke-linejoin="round"/><polyline points="${pts.join(' ')}" fill="none" stroke="#ffffff" stroke-width="3.5" stroke-linejoin="round"/>`;
+    $('fx').appendChild(s);s.animate([{opacity:1},{opacity:.25},{opacity:1},{opacity:.4},{opacity:1},{opacity:0}],{duration:650}).onfinish=()=>{s.remove();burst(bx,by,'#4a90ff',110);done&&done();};return;}
+  const d=document.createElement('div');d.className='fxg';
+  if(kind==='fire')d.style.cssText=`left:${ax-22}px;top:${ay-22}px;width:44px;height:44px;border-radius:50%;background:radial-gradient(circle,#fffbe0,#ffb020 35%,#ff5a10 62%,#b02000 78%,transparent 80%);box-shadow:0 0 30px 8px #ff6a10`;
+  else{const ang=Math.atan2(by-ay,bx-ax)*180/Math.PI;d.style.cssText=`left:${ax-15}px;top:${ay-2}px;width:30px;height:4px;background:linear-gradient(90deg,#7a5a2a 0 80%,#ddd 80%);border-radius:2px;transform-origin:center;rotate:${ang}deg`;}
+  $('fx').appendChild(d);
+  d.animate([{transform:'translate(0,0)'},{transform:`translate(${bx-ax}px,${by-ay}px)`}],{duration:kind==='fire'?620:520,easing:'ease-in',fill:'forwards'}).onfinish=()=>{d.remove();burst(bx,by,kind==='fire'?'#ff6a10':'#c9a227',kind==='fire'?120:50);done&&done();};
+}
+function glow(x,col){const el=pieceEl(x);if(!el)return;el.animate([{filter:`drop-shadow(0 0 0 ${col})`},{filter:`drop-shadow(0 0 10px ${col})`},{filter:`drop-shadow(0 0 0 ${col})`}],{duration:700});}
+function animSpec(S,a){
+  const at=x=>x&&S.b[x[0]]&&S.b[x[0]][x[1]]?Object.assign({},S.b[x[0]][x[1]]):null,p=S.turn;
+  switch(a.k){
+    case'move':case'banner':case'flank':case'bstep':case'berserk':case'front':
+      if(a.mode==='portal'){const g=at(a.tower);return{t:'portal',from:a.from,tower:a.tower,exit:a.exit,shift:a.shift,mover:at(a.from),gate:g&&g.t==='wizard'?'wizard':'tower',gateSide:g?g.o:p,last:[a.from,a.exit]};}
+      return{t:'move',from:a.from,to:a.to,victim:(a.mode==='capture'||a.mode==='destroy'||a.k==='bstep'||a.k==='berserk')?at(a.to):null,stack:a.mode==='stack',mover:at(a.from),art:a.k==='banner'||a.k==='flank'||a.k==='berserk',last:[a.from,a.to]};
+    case'ranged':return{t:'shot',from:a.from,to:a.to,victim:at(a.to),fire:p==='b',rank:(at(a.from)||{}).n||1,last:[a.from,a.to]};
+    case'archers':return{t:'arrow',to:a.to,victim:at(a.to),side:p,last:[a.to]};
+    case'golem':return{t:'move',from:a.from,to:a.to,victim:at(a.to),art:true,last:[a.from,a.to]};
+    case'keg':return{t:'boom',from:a.from,to:a.to,v1:at(a.from),v2:at(a.to),last:[a.from,a.to]};
+    case'blink':case'relay':return{t:'swap',from:a.from,to:a.to,last:[a.from,a.to]};
+    case'unstack':case'unstackT':return{t:'unstack',from:a.from,to:a.to,last:[a.from,a.to]};
+    case'cavnoble':case'totower':case'tonoble':case'flip':return{t:'flip',at:a.at,kind:a.k,last:[a.at]};
+    case'decree':return{t:'flip',at:a.to,last:[a.to]};
+    case'shield':return{t:'shield',at:a.to,last:[a.to]};
+    case'recruit':case'sell':return{t:'recruit',art:a.k==='sell'};
+  }
+  return null;
+}
+function fxAudio(file,vol){const a=new Audio('sfx/'+file);a.preload='auto';a.volume=vol;return a;}
+const FX={
+  click:fxAudio('click.mp3',.4), capture:fxAudio('capture.mp3',.7), flame:fxAudio('flame.mp3',.55),
+  whoosh:fxAudio('fire-whoosh.mp3',.6), boom:fxAudio('fire-boom.mp3',.72), bolt:fxAudio('lightning.mp3',.6),
+  bed:fxAudio('lightning-bed.mp3',.28), mage:fxAudio('mage-move.mp3',.45), tower:fxAudio('tower-gain.mp3',.65),
+  shift:fxAudio('tower-shift.mp3',.55), stack:fxAudio('stack.mp3',.55), recruit:fxAudio('recruit.mp3',.6),
+  win:fxAudio('win.mp3',.7)
+};
+function playFx(name){if(prefs.sound===false)return;const a=FX[name];if(!a)return;try{a.currentTime=0;const r=a.play();if(r&&r.catch)r.catch(()=>{});}catch(e){}}
+function soundFor(sp){
+  if(!sp)return;
+  const capt=sp.victim||sp.v2;
+  if(sp.t==='shot'){
+    if(sp.fire){
+      if(sp.rank===2){playFx('whoosh');setTimeout(()=>{playFx('boom');if(capt)playFx('capture');},620);}
+      else{playFx('flame');setTimeout(()=>{if(capt)playFx('capture');},1000);}
+    }else{
+      playFx('bolt'); if(sp.rank===2)playFx('bed');
+      setTimeout(()=>{if(capt)playFx('capture');},640);
+    }
+    return;
+  }
+  if(sp.t==='arrow'){sfx('magic');setTimeout(()=>{if(capt)playFx('capture');},300);return;}
+  if(sp.t==='boom'){sfx('magic');return;}
+  if(sp.t==='portal'){playFx('shift');return;}
+  if(sp.t==='swap'){sfx('magic');return;}
+  if(sp.t==='flip'||sp.t==='shield'){
+    if(sp.kind==='totower'){playFx('tower');return;}
+    if(sp.kind==='cavnoble'||sp.kind==='tonoble'||sp.kind==='flip'){sfx('promote');return;}
+    sfx('magic');return;
+  }
+  if(sp.t==='recruit'){if(sp.art)sfx('magic');else sfx('recruit');return;}
+  if(sp.t==='unstack'){playFx('stack');return;}
+  if(sp.stack){if(sp.mover&&sp.mover.t==='wizard')sfx('wstack');else playFx('stack');return;}
+  if(sp.art){sfx('magic');if(capt)setTimeout(()=>playFx('capture'),160);return;}
+  if(capt){playFx('capture');return;}
+  if(sp.mover&&sp.mover.t==='wizard'){playFx('mage');if(sp.promo)setTimeout(()=>sfx('promote'),300);return;}
+  sfx('move');
+  if(sp.promo)setTimeout(()=>sfx('promote'),300);
+}
+function flamethrower(fromRect,to,done){
+  const b=rectOf(to);if(!fromRect||!b){done&&done();return;}
+  const[ax,ay]=ctr(fromRect),[bx,by]=ctr(b),dx=bx-ax,dy=by-ay,len=Math.hypot(dx,dy)||1,ux=dx/len,uy=dy/len,px=-uy,py=ux;
+  const span=Math.min(46, 18+len*0.08);
+  const tipx=ax+ux*Math.min(len, 28), tipy=ay+uy*Math.min(len, 28);
+  const s=document.createElementNS('http://www.w3.org/2000/svg','svg');
+  s.setAttribute('style','position:fixed;left:0;top:0;width:100vw;height:100vh;pointer-events:none');
+  const poly=(w,fill)=>`<polygon points="${tipx.toFixed(1)},${tipy.toFixed(1)} ${(bx+px*w).toFixed(1)},${(by+py*w).toFixed(1)} ${(bx-px*w).toFixed(1)},${(by-py*w).toFixed(1)}" fill="${fill}"/>`;
+  s.innerHTML=poly(span,'rgba(255,70,0,.35)')+poly(span*.62,'rgba(255,150,20,.75)')+poly(span*.28,'rgba(255,244,210,.9)');
+  $('fx').appendChild(s);
+  s.animate([{opacity:0,transform:'scale(.72)',transformOrigin:`${ax}px ${ay}px`},{opacity:1,offset:.1},{opacity:.95,offset:.8},{opacity:0}],{duration:1000,easing:'linear'}).onfinish=()=>{s.remove();burst(bx,by,'#ff6a10',70);done&&done();};
+}
+function fireball(fromRect,to,done){
+  const b=rectOf(to);if(!fromRect||!b){done&&done();return;}
+  const[ax,ay]=ctr(fromRect),[bx,by]=ctr(b);
+  const d=document.createElement('div');d.className='fxg';
+  d.style.cssText=`left:${ax-11}px;top:${ay-11}px;width:22px;height:22px;border-radius:50%;background:radial-gradient(circle,#fffbe0,#ffb020 40%,#ff4a00 70%,transparent 78%);box-shadow:0 0 16px 4px #ff6a10`;
+  $('fx').appendChild(d);
+  d.animate([{transform:'translate(0,0) scale(.7)'},{transform:`translate(${bx-ax}px,${by-ay}px) scale(1)`}],{duration:620,easing:'ease-in',fill:'forwards'}).onfinish=()=>{
+    d.remove();
+    burst(bx,by,'#ff6a10',96);burst(bx,by,'#fff1c4',48);
+    for(let i=0;i<7;i++){
+      const e=document.createElement('div');e.className='fxg';
+      const ang=Math.random()*6.28, dist=18+Math.random()*28;
+      e.style.cssText=`left:${bx-4}px;top:${by-4}px;width:8px;height:8px;border-radius:50%;background:#ffb020;box-shadow:0 0 8px #ff6a10`;
+      $('fx').appendChild(e);
+      e.animate([{transform:'translate(0,0)',opacity:1},{transform:`translate(${Math.cos(ang)*dist}px,${Math.sin(ang)*dist}px)`,opacity:0}],{duration:420,easing:'ease-out'}).onfinish=()=>e.remove();
+    }
+    done&&done();
+  };
+}
+function lightning(fromRect,to,n,done){
+  const b=rectOf(to);if(!fromRect||!b){done&&done();return;}
+  const[ax,ay]=ctr(fromRect),[bx,by]=ctr(b);
+  const s=document.createElementNS('http://www.w3.org/2000/svg','svg');
+  s.setAttribute('style','position:fixed;left:0;top:0;width:100vw;height:100vh;pointer-events:none');
+  let html='';
+  for(let k=0;k<n;k++){
+    const steps=7;let pts=[];
+    const amp=n===1?16:(8+k*5);
+    for(let i=0;i<=steps;i++){
+      const t=i/steps, j=(i===0||i===steps)?0:(Math.random()*2-1)*amp;
+      const px=ax+(bx-ax)*t+j*(by-ay)/Math.hypot(bx-ax,by-ay||1);
+      const py=ay+(by-ay)*t-j*(bx-ax)/Math.hypot(bx-ax||1,by-ay);
+      pts.push(px.toFixed(1)+','+py.toFixed(1));
+    }
+    const line=pts.join(' ');
+    html+=`<polyline points="${line}" fill="none" stroke="#1e3a8a" stroke-width="${n===1?16:10}" opacity=".28" stroke-linejoin="round"/>`;
+    html+=`<polyline points="${line}" fill="none" stroke="#6fb4ff" stroke-width="${n===1?9:6}" opacity=".8" stroke-linejoin="round"/>`;
+    html+=`<polyline points="${line}" fill="none" stroke="#ffffff" stroke-width="${n===1?3.5:2.4}" stroke-linejoin="round"/>`;
+  }
+  s.innerHTML=html; $('fx').appendChild(s);
+  s.animate([{opacity:1},{opacity:.2},{opacity:1},{opacity:.35},{opacity:1},{opacity:0}],{duration:n===1?650:820}).onfinish=()=>{s.remove();burst(bx,by,'#4a90ff',n===1?110:150);done&&done();};
+}
+function runAnim(sp){
+  if(!sp||!prefs.motion)return;
+  switch(sp.t){
+    case'move':slideFrom(sp.to,sp.from);if(sp.victim)ghost(sp.victim,sp.to,120);if(sp.stack)bounce(sp.to,280);if(sp.promo)flipAt(sp.to,300);break;
+    case'portal':{
+      slideFrom(sp.exit,sp.from,520,sp.tower);slideFrom(sp.shift,sp.tower,420);if(sp.promo)flipAt(sp.exit,520);
+      const col='#b67cff';
+      glow(sp.shift,col);glow(sp.exit,col);
+      for(const sq of [sp.tower,sp.shift,sp.exit]){
+        const r=rectOf(sq);if(!r)continue;
+        const d=fxBox(r,'');
+        d.style.borderRadius='50%';
+        d.style.background='radial-gradient(circle,rgba(214,176,255,.8),rgba(110,50,190,.28) 55%,transparent 72%)';
+        d.animate([{opacity:0,transform:'scale(.45)'},{opacity:.95,offset:.3},{opacity:0,transform:'scale(1.2)'}],{duration:720,easing:'ease-out'}).onfinish=()=>d.remove();
+      }
+      break;}
+    case'shot':{
+      glow(sp.from,sp.fire?'#ff6a10':'#4a90ff');
+      const done=()=>ghost(sp.victim,sp.to);
+      if(sp.fire&&sp.rank===2)fireball(rectOf(sp.from),sp.to,done);
+      else if(sp.fire)flamethrower(rectOf(sp.from),sp.to,done);
+      else lightning(rectOf(sp.from),sp.to,sp.rank===2?6:1,done);
+      break;}
+    case'arrow':{const r=rectOf([backRow(sp.side),sp.to[1]]);const from=r?{left:r.left,top:r.top+(sp.side==='w'?r.height*1.2:-r.height*1.2),width:r.width,height:r.height}:null;projectile(from,sp.to,'arrow',()=>ghost(sp.victim,sp.to));break;}
+    case'boom':{const r=rectOf(sp.to);if(r){const[x,y]=ctr(r);burst(x,y,'#ff6a00',140);}ghost(sp.v1,sp.from);ghost(sp.v2,sp.to);break;}
+    case'swap':slideFrom(sp.to,sp.from,360);slideFrom(sp.from,sp.to,360);break;
+    case'unstack':slideFrom(sp.to,sp.from,320);bounce(sp.from,60);if(sp.promo)flipAt(sp.to,320);break;
+    case'flip':flipAt(sp.at);if(sp.kind==='totower')glow(sp.at,'#e7c766');break;
+    case'shield':glow(sp.at,'#4a8cff');break;
+  }
+}
+let arrivalsShown='';
+function animArrivals(){
+  if(!S.arrivals||!S.arrivals.length)return;
+  const key=S.turnNo+S.turn+JSON.stringify(S.arrivals);if(key===arrivalsShown)return;arrivalsShown=key;
+  const knight=S.arrivals.some(([r,c])=>S.b[r]&&S.b[r][c]&&S.b[r][c].t==='knight');
+  if(knight)playFx('recruit');else sfx('recruit');
+  if(!prefs.motion)return;
+  for(const[r,c]of S.arrivals){const cell=document.querySelector(`#camp${S.turn==='w'?'W':'B'} .cs[data-c="${c}"]`);if(cell)slideFromRect([r,c],cell.getBoundingClientRect(),420);}
+}
+let dangerShown='';
+function dangerSound(){syncCheck();}
+function renderStyle(m){
+  const sel=(k,opts,current)=>{const cur=current===undefined?prefs[k]:current;return `<select data-pref="${k}">${opts.map(([v,l])=>`<option value="${v}" ${String(cur)===String(v)?'selected':''}>${l}</option>`).join('')}</select>`;};
+  const prev=['knight','noble','wizard','tower'].map(t=>pieceSVG({o:'w',t,n:1},'')+pieceSVG({o:'b',t,n:1},'')).join('');
+  const menuScreen=!S||S.phase!=='play';
+  const trackShown=menuScreen&&!musicPreview?'menu':prefs.track;
+  m.innerHTML=`<div class="modal"><div class="box" style="max-width:520px"><div class="rbclose"><button class="primary" id="mClose" type="button">✕</button></div><h2>⚙ Settings</h2>
+  <div class="stylegrid"><label>Pieces</label>${sel('piece',[['woodcut','Woodcut'],['woodhelm','Woodcut helms'],['classic','Classic']])}
+  <label>Board</label>${sel('board',[['classic','Classic'],['walnut','Walnut & Maple'],['grass','Grass battlefield'],['marble','Marble'],['night','Night']])}
+  <label>Animations</label>${sel('motion',[['true','On'],['false','Off (reduce motion)']])}
+  <label>Game music</label>${sel('track',[['menu','Übermensch'],['pursuit','Determined Pursuit'],['embers','Embers on the Flagstone']],trackShown)}
+  <label>Music volume</label><input id="mVol" type="range" min="0" max="100" value="${Math.round(prefs.vol)}">
+  <label>Music</label>${sel('music',[['true','On'],['false','Off']])}<label>Effects</label>${sel('sound',[['true','On'],['false','Off']])}
+  <label>Move hints</label><select data-hints="1"><option value="on" ${S.rules.hints!==false?'selected':''}>Tutorial (show move dots)</option><option value="off" ${S.rules.hints===false?'selected':''}>Fog of war (hide hints)</option></select></div>
+  <div class="stylepreview">${prev}</div>
+  <div class="board th-${prefs.board} minib">${Array.from({length:16},(_,i)=>`<div class="sqr ${((i>>2)+i)%2?'d':'l'}"></div>`).join('')}</div>
+  <p class="hint">The menu selects Übermensch again each time you return to it. A match starts on Determined Pursuit. During a match you can choose any of the three, and that choice lasts only for the match. The slider sets music loudness only. The speaker turns the music off and leaves the effects on.</p>
+  <div class="btns"><button id="sRules">Rulebook</button><button id="sLore">Lore</button><button id="sCredits">Credits</button><button id="sExport">Export log</button><button class="primary" id="mClose2" type="button">Done</button></div></div></div>`;
+  m.querySelectorAll('[data-hints]').forEach(e=>e.onchange=()=>{S.rules.hints=e.value==='on';S.log.push(S.rules.hints?'Move hints turned on (tutorial)':'Move hints turned off (fog of war)');render();});
+  m.querySelectorAll('[data-pref]').forEach(e=>e.onchange=()=>{const k=e.dataset.pref,v=e.value;prefs[k]=(v==='true'?true:v==='false'?false:v);savePrefs();if(k==='sound'&&prefs.sound)ac();if(k==='music')syncMusic(true);if(k==='track'){musicPreview=true;syncMusic(true);}render();});
+  const vol=$('mVol');if(vol)vol.oninput=()=>{prefs.vol=+vol.value;savePrefs();syncMusic(false);};
+  const closeStyle=()=>{musicPreview=false;modalView=null;render();};
+  $('mClose').onclick=closeStyle;
+  $('mClose2').onclick=closeStyle;
+  $('sRules').onclick=()=>{modalView='rules';render();};
+  $('sLore').onclick=()=>{modalView='lore';render();};
+  $('sCredits').onclick=()=>{modalView='credits';render();};
+  $('sExport').onclick=()=>{modalView='export';render();};
+  markMusic();
+}
+
+/* ===================== UI STATE ===================== */
+let S=newState(),H=[],LEG=[],ui={kinds:null,path:[],sel:null},confirmNew=false,confirmForfeit=false;
+const IMMEDIATE=['cavnoble','totower','tonoble','flip','recruit','sell','bstop'];
+function pressPieceAction(k){
+  if(k==='cancel'){cancelAction();return;}
+  if(IMMEDIATE.includes(k)){const a=LEG.find(x=>x.k===k&&eq(x.at,ui.sel));if(a)doAction(a);return;}
+  if(k==='ranged'){const a=LEG.find(x=>x.k==='ranged'&&eq(x.from,ui.sel));if(a)doAction(a);return;}
+  ui={kinds:[k],path:[ui.sel],sel:ui.sel};render();
+}
+function pieceActLabel(k,s,p){
+  if(k==='front'){const a=LEG.find(x=>x.k==='front'&&eq(x.from,ui.sel));const n=a?a.cost:2;return `Front Line (${n} action${n>1?'s':''})`;}
+  if(k==='relay')return 'Swap with a friendly piece';
+  const label={ranged:p==='b'?'Fireball (ranged attack)':'Lightning (ranged attack)',unstack:'Unstack top piece',unstackT:'Unstack top wizard as a Tower',cavnoble:'Promote → Noble (sacrifice top knight)',totower:`Trade for Wizard Tower (${S.reserve[p]} in reserve)`,tonoble:s.t==='wizard'&&s.n===2?'Restore → King':'Restore → Noble',flip:s.t==='tower'?(s.n===2?'Flip → Archmage':'Flip → Wizard'):(s.n===2?"Flip → Archmage's Tower":'Flip → Tower')};
+  return label[k]||k;
+}
+function fillActbar(){
+  const bar=$('actbar');if(!bar)return;
+  const clear=()=>{bar.innerHTML='';document.body.style.paddingBottom='';};
+  const p=S.turn;
+  if(botTurn()||S.winner||S.phase!=='play'||!ui.sel||S.berserk){clear();return;}
+  const s=S.b[ui.sel[0]]&&S.b[ui.sel[0]][ui.sel[1]];
+  if(!s||s.o!==p){clear();return;}
+  const here=LEG.filter(a=>eq(a.from||a.at,ui.sel));
+  const keys=['ranged','front','relay','unstack','unstackT','cavnoble','totower','tonoble','flip'].filter(k=>here.some(a=>a.k===k));
+  let note='';
+  if(s.t==='noble'&&s.n===2)note='A king moves one square, and may move again with the other action. A king is never frozen while an action remains.';
+  else if(s.t==='noble'&&s.n===1&&S.reserve[p]>0&&nobleStacks(S,p).length===1)note='This is your last noble, so it cannot become a tower.';
+  else if(s.t==='noble'&&s.n===1&&S.reserve[p]>0&&nobleStacks(S,p).length>1&&!keys.includes('totower'))note='That trade would leave your other noble in danger, and you have no action left to save it.';
+  if(!keys.length&&!note){clear();return;}
+  bar.innerHTML=`<div class="who">${pname(s)} on ${sq(...ui.sel)}</div>${note?`<p class="hint" style="text-align:center;margin:0 0 4px">${note}</p>`:''}${keys.length?`<div class="btns">${keys.map(k=>`<button class="primary" data-k="${k}">${pieceActLabel(k,s,p)}</button>`).join('')}</div>`:''}`;
+  document.body.style.paddingBottom='108px';
+  bar.querySelectorAll('[data-k]').forEach(b=>b.onclick=()=>pressPieceAction(b.dataset.k));
+}
+function actPath(a){
+  switch(a.k){
+    case'move':case'banner':case'flank':return a.mode==='portal'?[a.from,a.tower,a.exit]:[a.from,a.to];
+    case'ranged':case'unstack':case'unstackT':case'golem':case'keg':case'blink':case'berserk':case'front':case'relay':return[a.from,a.to];
+    case'archers':case'decree':case'shield':case'bstep':return[a.to];
+  }
+  return null;
+}
+function cands(){
+  if(!ui.kinds)return[];
+  return LEG.filter(a=>ui.kinds.includes(a.k)).filter(a=>{const ph=actPath(a);if(!ph||ph.length<=ui.path.length)return false;for(let i=0;i<ui.path.length;i++)if(!eq(ph[i],ui.path[i]))return false;return true;});
+}
+function stepClass(a,i){
+  const last=actPath(a).length-1;
+  if(a.mode==='portal')return i===1?'h-por':'h-ex';
+  if(i<last)return 'h-pick';
+  if(['capture','destroy'].includes(a.mode)||['ranged','archers','berserk','bstep','keg'].includes(a.k))return 'h-cap';
+  if(a.mode==='stack')return 'h-stk';
+  if(a.k==='relay')return 'h-stk';
+  if(['decree','shield','blink'].includes(a.k))return 'h-pick';
+  return 'h-mov';
+}
+function doAction(a){
+  H.push(JSON.stringify(S));
+  const sp=animSpec(S,a),hadWinner=S.winner;
+  const p=S.turn,txt=apply(S,a);
+  if(sp){
+    const dest=sp.t==='portal'?sp.exit:sp.to;
+    if(sp.mover&&sp.mover.t==='knight'&&sp.mover.n===1&&dest){const now=S.b[dest[0]][dest[1]];if(now&&now.t==='noble'&&now.o===p)sp.promo=true;}
+    if(sp.t==='unstack'){const now=S.b[sp.to[0]][sp.to[1]];if(now&&now.t==='noble')sp.promo=true;}
+    if(sp.last)S.lastMove=sp.last;
+  }
+  S.log.push(`T${S.turnNo} ${NAME[p]}: ${txt}`);
+  if(!S.winner&&checkApplies(S,p)&&inDanger(S,p)&&legalActions(S).length===0){S.winner=opp(p);S.result=`Checkmate — ${NAME[p]}'s last noble cannot escape danger. ${NAME[opp(p)]} wins.`;}
+  if(S.winner)S.log.push(`★ ${S.result}`);
+  ui={kinds:null,path:[],sel:null};note='';
+  if(S.berserk)ui={kinds:['bstep'],path:[],sel:null};
+  else if(autoEnd&&!S.winner&&S.phase==='play'&&S.actionsLeft<=0){S.log.push(`— ${NAME[p]}'s turn ends —`);endTurn(S);if(S.winner)S.log.push(`★ ${S.result}`);}
+  render();
+  soundFor(sp);if(S.winner&&!hadWinner)setTimeout(()=>playFx('win'),350);
+  requestAnimationFrame(()=>runAnim(sp));
+}
+function onSquare(r,c){
+  if(S.winner||botTurn()||paused)return;note='';
+  if(S.phase!=='play')return;
+  const nx=cands().filter(a=>eq(actPath(a)[ui.path.length],[r,c]));
+  if(nx.length){
+    ui.path.push([r,c]);
+    const done=nx.filter(a=>actPath(a).length===ui.path.length);
+    if(done.length){doAction(done[0]);return;}
+    render();return;
+  }
+  if(S.berserk)return;
+  if(ui.sel&&eq(ui.sel,[r,c])){ui={kinds:null,path:[],sel:null};render();return;}
+  const s=S.b[r][c];
+  if(s&&s.o===S.turn){const kinds=['move'];if(s.t==='knight'&&s.n===1)kinds.push('front');if(s.t==='tower'&&s.n===2)kinds.push('relay');ui={kinds,path:[[r,c]],sel:[r,c]};}
+  else ui={kinds:null,path:[],sel:null};
+  render();
+}
+
+let longFired=false,note='',autoEnd=false;
+try{autoEnd=localStorage.getItem('pc_autoEnd')==='1';}catch(e){}
+function openUnstack(r,c){
+  if(S.phase!=='play'||S.winner||S.berserk||botTurn())return;
+  const s=S.b[r][c];
+  if(!s||s.o!==S.turn||s.n!==2)return;
+  if(!LEG.some(a=>a.k==='unstack'&&eq(a.from,[r,c]))){note=`This ${pname(s)} can't unstack right now (it has already acted, is frozen, or has no open square next to it).`;ui={kinds:['move'],path:[[r,c]],sel:[r,c]};render();return;}
+  ui={kinds:['unstack'],path:[[r,c]],sel:[r,c]};note='';render();
+}
+function cancelAction(){ui={kinds:null,path:[],sel:null};note='';render();}
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!S.berserk)cancelAction();});
+
+/* ===================== ARTIFACT ART ===================== */
+function mini(s,x,y,w){
+  if(prefs.piece==='woodcut'||prefs.piece==='woodhelm')return `<image href="${pieceFile(s)}" x="${x}" y="${y}" width="${w}" height="${w}" preserveAspectRatio="xMidYMid meet"/>`;
+  return pieceSVG(s,'').replace('<svg ',`<svg x="${x}" y="${y}" width="${w}" height="${w}" `);
+}
+const FIG={
+ archers:`<rect x="8" y="74" width="84" height="12" rx="2" fill="#8a6a34" stroke="#3b2a17" stroke-width="3"/>${[22,50,78].map(x=>`<circle cx="${x}" cy="36" r="6" fill="#3b2a17"/><path d="M${x} 42 V70 M${x} 52 L${x+8} 46" stroke="#3b2a17" stroke-width="4" fill="none"/><path d="M${x+6} 30 Q${x+16} 46 ${x+6} 62" stroke="#7a4a1a" stroke-width="3" fill="none"/>`).join('')}`,
+ golem:`<rect x="30" y="38" width="40" height="38" rx="4" fill="#8f8a80" stroke="#3b3a36" stroke-width="3"/><rect x="38" y="18" width="24" height="20" rx="3" fill="#a19b90" stroke="#3b3a36" stroke-width="3"/><rect x="44" y="25" width="4" height="4" fill="#ffcf40"/><rect x="52" y="25" width="4" height="4" fill="#ffcf40"/><rect x="16" y="40" width="12" height="30" rx="3" fill="#8f8a80" stroke="#3b3a36" stroke-width="3"/><rect x="72" y="40" width="12" height="30" rx="3" fill="#8f8a80" stroke="#3b3a36" stroke-width="3"/><rect x="33" y="76" width="13" height="14" fill="#8f8a80" stroke="#3b3a36" stroke-width="3"/><rect x="54" y="76" width="13" height="14" fill="#8f8a80" stroke="#3b3a36" stroke-width="3"/>`,
+ decree:`<rect x="20" y="24" width="60" height="52" fill="#f6ecd4" stroke="#3b2a17" stroke-width="3"/><rect x="14" y="18" width="72" height="10" rx="5" fill="#d8c193" stroke="#3b2a17" stroke-width="3"/><rect x="14" y="72" width="72" height="10" rx="5" fill="#d8c193" stroke="#3b2a17" stroke-width="3"/><path d="M28 38 H72 M28 46 H66 M28 54 H70" stroke="#8a6a34" stroke-width="3"/><circle cx="62" cy="66" r="8" fill="#8a2020"/>`,
+ banner:`<line x1="28" y1="10" x2="28" y2="92" stroke="#5a3a1a" stroke-width="5"/><path d="M30 14 H80 L70 30 L80 46 H30 Z" fill="#8a2020" stroke="#3b2a17" stroke-width="3"/><path d="M44 22 L50 36 L56 22" stroke="#e7c766" stroke-width="3" fill="none"/>`,
+ sellswords:`<path d="M50 12 Q26 20 26 50 L24 88 H76 L74 50 Q74 20 50 12 Z" fill="#4a3b2a" stroke="#1c130b" stroke-width="3"/><ellipse cx="50" cy="42" rx="12" ry="14" fill="#1c130b"/><circle cx="45" cy="42" r="2" fill="#ffcf40"/><circle cx="55" cy="42" r="2" fill="#ffcf40"/><line x1="70" y1="40" x2="88" y2="90" stroke="#c9c9c9" stroke-width="4"/><line x1="66" y1="54" x2="80" y2="50" stroke="#8a6a34" stroke-width="4"/>`,
+ berserker:`<path d="M30 50 Q30 22 50 22 Q70 22 70 50 V60 H30 Z" fill="#a19b90" stroke="#3b3a36" stroke-width="3"/><path d="M30 38 Q14 30 16 12 Q24 26 34 30" fill="#f6ecd4" stroke="#3b2a17" stroke-width="3"/><path d="M70 38 Q86 30 84 12 Q76 26 66 30" fill="#f6ecd4" stroke="#3b2a17" stroke-width="3"/><path d="M34 60 Q50 92 66 60" fill="#c0602a" stroke="#3b2a17" stroke-width="3"/><circle cx="43" cy="48" r="3" fill="#8a2020"/><circle cx="57" cy="48" r="3" fill="#8a2020"/>`,
+ keg:`<circle cx="50" cy="56" r="28" fill="#2a2420" stroke="#000" stroke-width="3"/><rect x="26" y="80" width="48" height="8" fill="#2a2420"/><rect x="44" y="22" width="12" height="10" fill="#5a5048"/><path d="M50 22 Q58 10 66 14" stroke="#c9a227" stroke-width="3" fill="none"/><path d="M66 8 l3 6 6 -2 -3 6 5 4 -7 0 -1 6 -3 -6 -6 2 4 -5 -4 -5 6 1z" fill="#ff9a20"/><circle cx="40" cy="48" r="6" fill="#ffffff33"/>`,
+ blink:`<circle cx="50" cy="52" r="40" fill="#7b3cc022"/><path d="M30 86 L26 40 Q30 18 50 16 Q70 18 74 40 L70 86 Z" fill="#8f8a80" stroke="#3b3a36" stroke-width="3"/><path d="M50 30 V70 M38 42 L62 58 M62 42 L38 58" stroke="#b67cff" stroke-width="4"/>`,
+ flank:`<line x1="50" y1="8" x2="50" y2="94" stroke="#5a3a1a" stroke-width="5"/><rect x="18" y="14" width="64" height="34" fill="#2a5fbf" stroke="#1c130b" stroke-width="3"/><path d="M24 31 L36 22 V27 H46 V35 H36 V40 Z M76 31 L64 22 V27 H54 V35 H64 V40 Z" fill="#f6ecd4"/>`,
+ shield:`<path d="M50 10 L82 20 V48 Q82 76 50 92 Q18 76 18 48 V20 Z" fill="#2a5fbf" stroke="#1c130b" stroke-width="3"/><path d="M50 18 V84 M24 44 H76" stroke="#e7c766" stroke-width="7"/>`
+};
+function artArt(id,big){
+  const W={o:'w',t:'knight',n:1},B={o:'b',t:'knight',n:1},x0=120,y0=8,cl=37;
+  const cx=c=>x0+cl*c+cl/2,cy=r=>y0+cl*r+cl/2,P=(s,r,c)=>mini(s,x0+cl*c+3,y0+cl*r+3,cl-6);
+  const ar=(r1,c1,r2,c2,col='#2f7a2f')=>`<line x1="${cx(c1)}" y1="${cy(r1)}" x2="${cx(c2)}" y2="${cy(r2)}" stroke="${col}" stroke-width="4" marker-end="url(#ah-${id}-${col.slice(1)})"/>`;
+  const X=(r,c)=>`<path d="M${cx(c)-12} ${cy(r)-12} L${cx(c)+12} ${cy(r)+12} M${cx(c)+12} ${cy(r)-12} L${cx(c)-12} ${cy(r)+12}" stroke="#c0262b" stroke-width="5"/>`;
+  let g='';for(let r=0;r<4;r++)for(let c=0;c<4;c++)g+=`<rect x="${x0+cl*c}" y="${y0+cl*r}" width="${cl}" height="${cl}" fill="${(r+c)%2?'#9a6a3a':'#ecd9ab'}"/>`;
+  let d='';
+  switch(id){
+   case'archers':d=`<rect x="${x0}" y="${y0+2*cl}" width="${cl*4}" height="${cl*2}" fill="#2f7a2f33" stroke="#2f7a2f" stroke-dasharray="4 3"/>`+P(B,2,2)+P({o:'b',t:'knight',n:2},3,0)+X(2,2)+ar(3,3,2,2,'#c0262b');break;
+   case'golem':d=P({o:'w',t:'tower',n:1},2,1)+P({o:'b',t:'tower',n:1},1,2)+ar(2,1,1,2,'#c0262b')+X(1,2);break;
+   case'decree':d=P(W,2,0)+ar(2,1,2,2)+P({o:'w',t:'noble',n:1},2,3);break;
+   case'banner':d=P(W,3,0)+P(B,0,3)+ar(3,0,0,3,'#c0262b')+X(0,3);break;
+   case'sellswords':d=P(W,1,0)+P(W,2,0)+`<rect x="${x0+2}" y="${y0+cl+2}" width="${cl-4}" height="${cl*2-4}" fill="none" stroke="#3b2a17" stroke-dasharray="3 3"/>`+ar(1,1,1,3)+ar(2,1,2,3)+P(W,1,3)+P(W,2,3);break;
+   case'berserker':d=P(W,3,0)+P(B,2,1)+P(B,1,2)+P(B,0,3)+ar(3,0,2,1,'#c0262b')+ar(2,1,1,2,'#c0262b')+ar(1,2,0,3,'#c0262b')+X(2,1)+X(1,2)+X(0,3);break;
+   case'keg':d=P(W,2,1)+P({o:'b',t:'tower',n:1},1,2)+`<circle cx="${(cx(1)+cx(2))/2}" cy="${(cy(1)+cy(2))/2}" r="26" fill="#ff9a2066" stroke="#ff6a00" stroke-width="3"/>`+X(1,2)+X(2,1);break;
+   case'blink':d=P({o:'w',t:'tower',n:1},0,0)+P(W,3,3)+`<path d="M${cx(0)+10} ${cy(0)+10} Q${cx(3)} ${cy(0)} ${cx(3)-6} ${cy(3)-14}" stroke="#7b3cc0" stroke-width="4" fill="none" marker-end="url(#ah-${id}-7b3cc0)"/><path d="M${cx(3)-12} ${cy(3)-8} Q${cx(0)} ${cy(3)} ${cx(0)+4} ${cy(0)+16}" stroke="#7b3cc0" stroke-width="4" fill="none" marker-end="url(#ah-${id}-7b3cc0)"/>`;break;
+   case'flank':d=P(W,2,1)+P({o:'w',t:'knight',n:2},1,2)+ar(2,1,2,0)+ar(2,1,2,2)+ar(1,2,1,3);break;
+   case'shield':d=P({o:'w',t:'noble',n:1},2,1)+`<text x="${cx(1)+6}" y="${cy(2)-4}" font-size="18">🛡</text>`+P({o:'b',t:'noble',n:1},0,1)+`<line x1="${cx(1)}" y1="${cy(0)+14}" x2="${cx(1)}" y2="${cy(2)-24}" stroke="#c0262b" stroke-width="4"/><path d="M${cx(1)-14} ${cy(1)+2} H${cx(1)+14}" stroke="#2a5fbf" stroke-width="6"/>`;break;
+  }
+  const defs=['2f7a2f','c0262b','7b3cc0'].map(c=>`<marker id="ah-${id}-${c}" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M0 0 L10 5 L0 10 Z" fill="#${c}"/></marker>`).join('');
+  return `<svg viewBox="0 0 280 164" style="width:100%;max-width:${big?520:300}px;display:block;margin:4px auto" aria-hidden="true"><defs>${defs}</defs><rect x="2" y="8" width="108" height="148" rx="10" fill="#fbf2dc" stroke="#b8892b" stroke-width="2"/><image href="art/plaques/${id}.png" x="8" y="20" width="96" height="128" preserveAspectRatio="xMidYMid meet"/>${g}${d}<rect x="${x0}" y="${y0}" width="${cl*4}" height="${cl*4}" fill="none" stroke="#3b2918" stroke-width="2"/></svg>`;
+}
+
+/* ===================== MUSIC ===================== */
+const MUSIC={menu:new Audio('music/epic-menu-loop.mp3'),pursuit:new Audio('music/determined-pursuit.mp3'),embers:new Audio('music/embers.mp3'),check:new Audio('sfx/check-loop.mp3')};
+MUSIC.menu.loop=MUSIC.pursuit.loop=MUSIC.embers.loop=MUSIC.check.loop=true;
+MUSIC.menu.volume=0.16;MUSIC.pursuit.volume=MUSIC.embers.volume=0.22;MUSIC.check.volume=0.42;
+let musicNow=null,musicPreview=false;
+function musicKey(){
+  if(prefs.music===false)return null;
+  const game=(prefs.track==='menu'||prefs.track==='embers')?prefs.track:'pursuit';
+  if(modalView==='style'&&musicPreview)return game;
+  if(modalView==='rules'||modalView==='lore'||modalView==='credits')return 'menu';
+  if(!S||S.phase==='setup'||S.phase==='pick')return 'menu';
+  return game;
+}
+function markMusic(){
+  const off=prefs.music===false;
+  for(const id of ['bMusic','mMusic']){
+    const bm=$(id);if(!bm)continue;
+    bm.textContent=off?'🔇':'🔊';
+    bm.classList.toggle('off',off);
+    bm.title=off?'Music is off. Click the speaker to play it. Effects stay on.':'Mute music. Click the speaker again to play it. Effects stay on.';
+  }
+}
+function pinMenuTools(){
+  const box=document.querySelector('#modal .box');if(!box)return;
+  const old=box.querySelector('.menutop');if(old)old.remove();
+  if(!document.body.classList.contains('sheet'))return;
+  const bar=document.createElement('div');
+  bar.className='menutop';
+  bar.innerHTML='<button type="button" id="mMusic"></button>';
+  box.insertBefore(bar, box.firstChild);
+  $('mMusic').onclick=()=>{prefs.music=prefs.music===false?true:false;savePrefs();syncMusic(true);markMusic();};
+  markMusic();
+}
+function fitSheet(){
+  const menu=!S||S.phase==='setup'||S.phase==='pick'||modalView==='rules'||modalView==='lore'||modalView==='credits'||((modalView==='style'||modalView==='export')&&S.phase!=='play');
+  document.body.classList.toggle('sheet',!!menu);
+  if(menu){const h=document.querySelector('header');document.documentElement.style.setProperty('--head',((h&&h.offsetHeight)||64)+'px');}
+}
+function empireCrest(o){
+  const src=o==='w'?'art/lore/fulgar-crest.jpg':'art/lore/angtapa-crest.jpg';
+  const name=o==='w'?'Fulgar Empire':'Angtapa Empire';
+  return `<img src="${src}" alt="${name}">`;
+}
+function menuTitle(){return `<h2 class="menutitle"><span class="crestwrap">${empireCrest('w')}<i>Fulgar</i></span><span>Strahtura</span><span class="crestwrap">${empireCrest('b')}<i>Angtapa</i></span></h2>`;}
+function musicScale(){const v=Number(prefs.vol);return (isFinite(v)?Math.min(100,Math.max(0,v)):100)/100;}
+function musicLevel(k,ducked){return (k==='menu'?0.16:(ducked?0.07:0.22))*musicScale();}
+function syncCheck(){
+  const bed=MUSIC.check;if(!bed)return;
+  const on=!!(prefs.sound!==false&&S&&S.phase==='play'&&!S.winner&&checkApplies(S,S.turn)&&inDanger(S,S.turn));
+  if(on){if(bed.paused){bed.currentTime=0;bed.play().catch(()=>{});}}
+  else if(!bed.paused)bed.pause();
+  const k=musicNow;
+  if(k&&MUSIC[k]&&k!=='check')MUSIC[k].volume=musicLevel(k,on&&prefs.music!==false);
+}
+function syncMusic(force){
+  const want=musicKey();const keys=['menu','pursuit','embers'];
+  if(!force&&want===musicNow){if(want&&MUSIC[want].paused)MUSIC[want].play().catch(()=>{});syncCheck();return;}
+  for(const k of keys)if(k!==want)MUSIC[k].pause();
+  musicNow=want;
+  if(want){MUSIC[want].volume=musicLevel(want,false);MUSIC[want].play().catch(()=>{});}
+  syncCheck();
+}
+
+/* ===================== RENDER ===================== */
+const $=id=>document.getElementById(id);
+function render(){
+  LEG=(S.phase==='play'&&!S.winner)?legalActions(S):[];
+  renderBoard();renderCamps();renderStatus();renderLeft();renderRight();renderModal();fillActbar();
+  const watch=!!(S.mode.ai.w&&S.mode.ai.b),showP=(watch||!!S.clock)&&!S.winner&&S.phase!=='setup';
+  $('bPause').style.display=showP?'':'none';$('bPause').textContent=paused?'▶ Resume':'⏸ Pause';
+  $('bStep').style.display=watch&&paused&&!S.winner?'':'none';
+  $('bForfeit').disabled=S.phase!=='play'||!!S.winner;
+  markMusic();fitSheet();pinMenuTools();syncMusic(false);
+  requestAnimationFrame(()=>{animArrivals();dangerSound();});
+  scheduleBot();
+}
+function renderBoard(){
+  const p=S.turn,C=cands(),hl={};
+  for(const a of C){const ph=actPath(a),i=ui.path.length,k=ph[i][0]*8+ph[i][1];const cl=stepClass(a,i);if(!hl[k]||cl==='h-cap')hl[k]=cl;}
+  const movable=new Set();
+  if(!ui.kinds&&!S.winner)for(const a of LEG){const f=a.from||a.at;if(f&&['move','front','relay','ranged','unstack','unstackT','cavnoble','totower','tonoble','flip'].includes(a.k))movable.add(f[0]*8+f[1]);}
+  let dangerSq=-1;
+  for(const q of['w','b'])if(checkApplies(S,q)&&inDanger(S,q)){const n=nobleStacks(S,q)[0];dangerSq=n.r*8+n.c;}
+  let h='<div></div><div class="coords">'+[...FILES].map(f=>`<span>${f}</span>`).join('')+'</div><div></div>';
+  h+='<div class="coords v">'+[8,7,6,5,4,3,2,1].map(n=>`<span>${n}</span>`).join('')+'</div><div class="board th-'+prefs.board+'">';
+  for(let r=0;r<8;r++)for(let c=0;c<8;c++){
+    const s=S.b[r][c],k=r*8+c;let cls='sqr '+((r+c)%2?'d':'l');
+    const fog=S.rules&&S.rules.hints===false;
+    if(hl[k]&&!fog)cls+=' '+hl[k];
+    if(ui.path.some(x=>eq(x,[r,c])))cls+=' selp';
+    if(movable.has(k)&&!fog)cls+=' can';
+    if(k===dangerSq)cls+=' danger';
+    if(S.lastMove&&S.lastMove.some(x=>x[0]===r&&x[1]===c))cls+=' lm';
+    if(S.phase==='place'&&r===backRow(p)&&!s)cls+=' place';
+    let inner='',title='';
+    if(s){
+      const fz=S.frozen[s.id],u=S.used[s.id],sh=S.shield[s.id];
+      if(s.o===p&&(fz||(u&&(u.x||u.m>0))))cls+=' dim';
+      inner=pieceSVG(s)+(s.n===2?'<span class="badge">×2</span>':'')+(sh?'<span class="tl">🛡</span>':fz&&s.o===p?'<span class="tl">❄</span>':'');
+      title=`${NAME[s.o]} ${pname(s)}${sh?' · shielded':''}${fz&&s.o===p?' · frozen this turn':''}`;
+    }
+    h+=`<div class="${cls}" data-r="${r}" data-c="${c}" title="${sq(r,c)}${title?' — '+title:''}">${inner}</div>`;
+  }
+  h+='</div><div class="coords v">'+[8,7,6,5,4,3,2,1].map(n=>`<span>${n}</span>`).join('')+'</div>';
+  h+='<div></div><div class="coords">'+[...FILES].map(f=>`<span>${f}</span>`).join('')+'</div><div></div>';
+  $('boardwrap').className='boardwrap th-'+prefs.board;
+  $('boardwrap').innerHTML=h;
+  $('boardwrap').querySelectorAll('.sqr').forEach(el=>{
+    const r=+el.dataset.r,c=+el.dataset.c;let timer=null;
+    el.onclick=()=>{if(longFired){longFired=false;return;}onSquare(r,c);};
+    el.ondblclick=e=>{e.preventDefault();openUnstack(r,c);};
+    el.onpointerdown=()=>{longFired=false;clearTimeout(timer);timer=setTimeout(()=>{longFired=true;openUnstack(r,c);},550);};
+    el.onpointerup=el.onpointerleave=el.onpointercancel=()=>clearTimeout(timer);
+    el.oncontextmenu=e=>e.preventDefault();
+  });
+}
+function campTargets(p){
+  if(S.turn!==p||!ui.kinds)return null;
+  const t=new Set();
+  if(ui.kinds.includes('recruit'))for(const a of LEG)if(a.k==='recruit')t.add(a.file);
+  if(ui.sell){const need=ui.sell.units[ui.sell.files.length];const cap=S.camp[p].slice();ui.sell.files.forEach((f,ix)=>cap[f]+=ui.sell.units[ix]);
+    for(let c=0;c<8;c++)if(cap[c]===0&&!S.b[backRow(p)][c])t.add(c);}
+  return t;
+}
+function renderCamps(){
+  for(const p of['b','w']){
+    const el=$(p==='w'?'campW':'campB'),tg=campTargets(p),r=backRow(p);
+    let cells='';
+    for(let c=0;c<8;c++){
+      const n=S.camp[p][c];let cls='cs';
+      if(n)cls+=S.b[r][c]?' blocked':' full';
+      if(tg&&tg.has(c))cls+=(S.rules&&S.rules.hints===false)?' fogok':' ok';
+      cells+=`<div class="${cls}" data-p="${p}" data-c="${c}" title="${NAME[p]} camp square ${FILES[c]}${n?` — ${n===2?'Cavalry':'Knight'} lands on ${sq(r,c)} next turn${S.b[r][c]?' (blocked now)':''}`:''}">${n?pieceSVG({o:p,t:'knight',n},'')+(n===2?'<span class="badge">×2</span>':''):''}</div>`;
+    }
+    const lbl=`<div class="lbl">${NAME[p]} camp — recruits land on the back-row square in front of them at the start of ${NAME[p]}'s next turn</div>`;
+    el.innerHTML=(p==='b'?lbl:'')+'<span></span>'+cells+'<span></span>'+(p==='w'?lbl:'');
+    el.querySelectorAll('.cs.ok,.cs.fogok').forEach(x=>x.onclick=()=>onCamp(+x.dataset.c));
+  }
+}
+function onCamp(c){
+  if(ui.kinds&&ui.kinds.includes('recruit')){const a=LEG.find(x=>x.k==='recruit'&&x.file===c);if(a)doAction(a);return;}
+  if(ui.sell){ui.sell.files.push(c);if(ui.sell.files.length===ui.sell.units.length){const a=Object.assign({},LEG[ui.sell.idx],{files:ui.sell.files.slice()});doAction(a);}else render();}
+}
+const fmt=ms=>{const t=Math.max(0,Math.ceil(ms/1000));return Math.floor(t/60)+':'+String(t%60).padStart(2,'0');};
+function clockHTML(){return `<div class="clocks">${['w','b'].map(q=>`<span class="clk${S.turn===q&&!S.winner?' on':''}${S.clock[q]<60000?' low':''}">${NAME[q]} ⏱ <b id="clk-${q}">${fmt(S.clock[q])}</b></span>`).join('')}${paused?'<span class="clk on">⏸ Paused</span>':''}</div>`;}
+function updClocks(){for(const q of['w','b']){const e=document.getElementById('clk-'+q);if(e)e.textContent=fmt(S.clock[q]);}}
+function renderStatus(){
+  const p=S.turn;let h='';
+  if(S.winner){h=`<div class="who">${S.winner==='draw'?'Draw':NAME[S.winner]+' wins'}</div><div>${S.result}</div>`;$('status').innerHTML=h;return;}
+  if(S.phase==='pick'){$('status').innerHTML=`<div class="who">Choosing artifacts</div><div>${NAME[S.picker]} picks ${S.picker==='b'?'first':'second'}.</div>`;return;}
+  if(S.clock)h+=clockHTML();
+  h+=`<div><span class="who">${EMPS[p]} (${NAME[p]})${isAI(p)?' (computer, '+S.mode.ai[p]+')':''}</span> to act · Turn ${S.turnNo}${S.rules&&S.rules.turnLimit?' of '+S.rules.turnLimit:''} · <b>${S.actionsLeft}</b> action${S.actionsLeft===1?'':'s'} left</div><div class="flags">`;
+  if(S.first[p])h+='<span>First turn: 1 action, no stacking, no artifacts</span>';
+  if(checkApplies(S,p))h+=inDanger(S,p)?'<span class="bad">CHECK — your last noble is in danger; your next action must end it</span>':'<span>Last noble piece: may not move into danger</span>';
+  const ns=nobleStacks(S,p);
+  const st=stacks(S,p);const k=st.find(x=>x.s.t==='knight');if(k&&dbl(S,k.s))h+='<span>Last stand: knight may move twice</span>';
+  if(S.berserk)h+='<span class="bad">Berserker rampage — capture again or stop</span>';
+  if(S.phase==='play'&&S.actionsLeft<=0&&!S.berserk&&!autoEnd&&!isAI(p))h+='<span class="bad" style="background:#2f7a2f">No actions left — Undo, or press End turn</span>';
+  h+='</div>';
+  if(note)h+=`<div class="hint">${note}</div>`;
+  const pending=ui.kinds&&(ui.path.length>1||!ui.kinds.includes('move'));
+  const canEnd=S.phase==='play'&&!S.berserk&&!(checkApplies(S,p)&&inDanger(S,p));
+  h+='<div class="btns" style="margin-top:6px">';
+  if(pending&&!S.berserk)h+=`<button id="sCancel" class="danger">✕ Cancel ${ui.kinds.includes('unstack')||ui.kinds.includes('unstackT')?'unstack':'action'}</button>`;
+  if(S.phase==='play'&&!botTurn())h+=`<button id="sEnd" class="${S.actionsLeft<=0?'primary':''}" ${canEnd?'':'disabled'}>End turn${S.actionsLeft>0?' (forfeit '+S.actionsLeft+')':''}</button>`;
+  h+='</div>';
+  $('status').innerHTML=h;
+  const sc=$('sCancel');if(sc)sc.onclick=cancelAction;
+  const se=$('sEnd');if(se)se.onclick=doEndTurn;
+}
+function doEndTurn(){H.push(JSON.stringify(S));S.log.push(`— ${NAME[S.turn]} ends the turn —`);ui={kinds:null,path:[],sel:null};note='';endTurn(S);if(S.winner)S.log.push(`★ ${S.result}`);render();}
+function gyRow(cnt,o,t,n){if(!cnt)return'';return `<span>${pieceSVG({o,t,n:1},'')}</span><span>${NAME[o]} ${t}${cnt>1?'s':''} × ${cnt}</span>`;}
+function renderLeft(){
+  let h='<h2>Graveyard</h2>';
+  for(const half of['b','w']){
+    h+=`<h3>${NAME[half]}'s half</h3><div class="gy">`;let any=false;
+    for(const o of['w','b'])for(const t of['knight','noble','wizard','tower']){const n=S.grave[half][o][t];if(n){any=true;h+=gyRow(n,o,t);}}
+    if(!any)h+='<span></span><span style="opacity:.6">empty</span>';
+    h+='</div>';
+  }
+  h+='<p class="hint">Captured pieces sit in the capturer\'s half; sacrificed pieces in their owner\'s half. Only your own knights can be recruited.</p>';
+  h+='<h2 style="margin-top:10px">Legend</h2><div class="legend"><span><i style="background:#2f7a2f"></i>move</span><span><i style="background:#c0262b"></i>capture</span><span><i style="background:#2a5fbf"></i>stack</span><span><i style="background:#7b3cc0"></i>tower shift / exit</span><span><i style="background:#c9a227"></i>choose</span></div><p class="hint">❄ <b>Frozen</b>: a piece that was just stacked, unstacked, flipped or traded. It cannot move, attack or act again until your next turn. Dimmed pieces have already acted this turn.</p><p class="hint">Double-tap or long-press a stack to unstack it.</p>';
+  $('left').innerHTML=h;
+}
+function towerSlots(p){
+  const inPlay=stacks(S,p).filter(x=>x.s.t==='tower'||x.s.t==='wizard').reduce((a,x)=>a+x.s.n,0);
+  const res=Math.min(2,S.reserve[p]),shown=Math.min(inPlay,2-res),lost=Math.max(0,2-res-shown);let h='<div class="tw"><span>Towers:</span>';
+  for(let i=0;i<res;i++)h+=`<span class="slot" title="In reserve">${pieceSVG({o:p,t:'tower',n:1},'')}</span>`;
+  for(let i=0;i<shown;i++)h+='<span class="slot" title="On the board" style="opacity:.5">⇡</span>';
+  for(let i=0;i<lost;i++)h+='<span class="slot lost" title="Lost for good">✕</span>';
+  return h+'</div>';
+}
+function sellPreview(gk,a){const u=sellUnits(S,a),cav=u.filter(x=>x===2).length,kn=u.filter(x=>x===1).length,got=cav*2+kn;
+  const parts=[];if(cav)parts.push(`${cav} cavalry`);if(kn)parts.push(`${kn} knight${kn>1?'s':''}`);return parts.join(' + ')+(got<a.acts*2?` (limited by ${got<gk?'open back-row squares':'fallen knights'})`:'');}
+function artCard(p){
+  const id=S.art[p];if(!id)return `<div class="card"><span class="fg">${S.rules&&S.rules.artifacts===false?'Artifacts are off this game':'No artifact chosen yet'}</span></div>`;
+  const a=artById(id),used=S.artUsed[p]&&!(id==='flank'&&S.flankTurn&&S.turn===p);
+  const avail=S.turn===p&&!isAI(p)&&LEG.some(x=>ARTK[id].includes(x.k));
+  let btn='';
+  if(avail&&!S.berserk){
+    if(id==='sellswords'&&ui.sell){const u=ui.sell.units[ui.sell.files.length];btn=`<p class="hint">Click a green camp square for recruit ${ui.sell.files.length+1} of ${ui.sell.units.length} (${u===2?'cavalry pair — needs an empty square':'knight'}).</p>`;}
+    else if(id==='sellswords'){const gk=graveKnights(S,p);btn=`<p class="hint">${gk} fallen knight${gk===1?'':'s'} in your graveyard.</p><div class="btns">`+LEG.filter(x=>x.k==='sell').map(x=>`<button data-sell="${LEG.indexOf(x)}">${x.acts} action${x.acts>1?'s':''}: ${sellPreview(gk,x)}</button>`).join('')+'</div>';}
+    else btn=`<button class="primary" data-art="${id}">${ui.kinds&&ui.kinds.includes(ARTK[id][0])?'Choosing… (click to cancel)':'Use '+a.name}</button>`;
+  }
+  const state=S.artUsed[p]&&!(id==='flank'&&S.flankTurn)?'Used — back in the treasure box':S.first[p]?'Not usable on your first turn':'Ready';
+  return `<div class="card ${S.artUsed[p]&&!(id==='flank'&&S.flankTurn)?'used':''}"><div class="nm" style="display:flex;justify-content:space-between;align-items:center">${a.name}<button data-info="${id}" style="font-size:13px;padding:1px 8px">ⓘ Card</button></div><img class="plaque" src="art/plaques/${id}.png" alt=""><div class="cs">${a.cost}</div><div class="tx">${a.text}</div><div class="hint">${state}</div>${btn}</div>`;
+}
+function renderRight(){
+  const p=S.turn;let hArts='',h='';
+  for(const q of['b','w'])hArts+=`<div class="panel"><h2>${pieceSVG({o:q,t:'noble',n:1},'crest')}${EMP[q]} (${NAME[q]})${S.turn===q&&!S.winner&&S.phase!=='pick'?' — to act':''}</h2>${artCard(q)}${towerSlots(q)}</div>`;
+  // actions panel
+  h+='<div class="panel"><h2>Actions</h2>';
+  if(botTurn()){h+=`<p class="hint">${paused?'Paused.':`The computer (${S.mode.ai[p]}) is thinking…`}</p>`;}
+  else if(S.phase==='play'&&!S.winner){
+    if(S.berserk){h+='<p class="hint">Click a red square to keep capturing, or stop.</p><div class="btns"><button class="primary" id="bStop">Stop rampage</button></div>';}
+    else{
+      const sel=ui.sel;
+      if(sel){
+        const s=S.b[sel[0]][sel[1]];
+        h+=`<p><b>${pname(s)}</b> on ${sq(...sel)}</p>`;
+        const here=LEG.filter(a=>eq(a.from||a.at,sel));
+        const btn=[];
+        const label=k=>pieceActLabel(k,s,p);
+        for(const k of['ranged','unstack','unstackT','cavnoble','totower','tonoble','flip'])if(here.some(a=>a.k===k))btn.push(`<button data-k="${k}">${label(k)}</button>`);
+        if(ui.kinds&&!ui.kinds.includes('move')){
+          h+=`<p class="hint">${ui.kinds.includes('unstack')?'Unstack: choose an open square next to the stack for the top piece.':ui.kinds.includes('unstackT')?'Unstack as Tower: choose an open square for the top wizard (placed as a tower).':'Choose a highlighted square.'} <button data-k="cancel">✕ Cancel</button></p>`;
+          if(ui.kinds.includes('unstack')&&here.some(a=>a.k==='unstackT'))h+='<div class="btns"><button data-k="unstackT">Place the top wizard as a Tower instead</button></div>';
+          if(ui.kinds.includes('unstackT'))h+='<div class="btns"><button data-k="unstack">Place the top wizard as a Wizard instead</button></div>';
+        }
+        h+=btn.length?'<div class="btns">'+btn.join('')+'</div>':'';
+        if(!here.length)h+='<p class="hint">This piece has no legal action right now.</p>';
+      }else if(ui.kinds){h+=`<p class="hint">${S.rules&&S.rules.hints===false?'Choose a square (fog of war: no hints).':'Choose a highlighted square.'} <button data-k="cancel">Cancel</button></p>`;}
+      else h+='<p class="hint">Click one of your pieces (outlined) to see its moves and actions.</p>';
+      const rec=LEG.filter(a=>a.k==='recruit');
+      if(rec.length){const gk=graveKnights(S,p);h+=`<h3>Recruit (${gk} fallen knight${gk===1?'':'s'})</h3><div class="btns"><button data-recmode="1" class="${ui.kinds&&ui.kinds.includes('recruit')?'primary':''}">${ui.kinds&&ui.kinds.includes('recruit')?'Now click a green camp square':'Recruit a knight → choose a camp square'}</button></div><p class="hint">Once per turn, onto an empty camp square in front of an empty back-row square, one knight each. It lands next turn and can't stack on the turn it lands. Only Sellswords can bring a cavalry pair</p>`;}
+    }
+    const canEnd=!S.berserk&&!(checkApplies(S,p)&&inDanger(S,p));
+    h+=`<div class="btns" style="margin-top:8px"><button id="bEnd" class="${S.actionsLeft<=0&&!S.berserk?'primary':''}" ${canEnd?'':'disabled'}>End turn${S.actionsLeft>0?' (forfeit '+S.actionsLeft+')':''}</button></div>`;
+  }
+  else if(S.winner)h+=`<p>${S.result}</p><div class="btns"><button class="primary" id="bAgain">Play again</button></div>`;
+  h+='</div>';
+  $('actions').innerHTML=h;$('arts').innerHTML=hArts;h='';
+  h+=`<div class="panel"><h2>Game log</h2><div class="log" id="log">${S.log.map(l=>`<div>${l}</div>`).join('')||'<div style="opacity:.6">No moves yet.</div>'}</div></div>`;
+  $('right').innerHTML=h;
+  const lg=$('log');if(lg)lg.scrollTop=lg.scrollHeight;
+  document.querySelectorAll('#actions [data-k]').forEach(b=>b.onclick=()=>pressPieceAction(b.dataset.k));
+  document.querySelectorAll('#actions [data-recmode],#arts [data-recmode]').forEach(b=>b.onclick=()=>{ui=(ui.kinds&&ui.kinds.includes('recruit'))?{kinds:null,path:[],sel:null}:{kinds:['recruit'],path:[],sel:null};render();});
+  document.querySelectorAll('#actions [data-sell],#arts [data-sell]').forEach(b=>b.onclick=()=>{const a=LEG[+b.dataset.sell];const units=sellUnits(S,a);ui={kinds:['sellpick'],path:[],sel:null,sell:{idx:+b.dataset.sell,units,files:[]}};render();});
+  document.querySelectorAll('#actions [data-art],#arts [data-art]').forEach(b=>b.onclick=()=>{const id=b.dataset.art;if(ui.kinds&&ui.kinds.includes(ARTK[id][0]))ui={kinds:null,path:[],sel:null};else ui={kinds:ARTK[id],path:[],sel:null};render();});
+  const be=$('bEnd');if(be)be.onclick=doEndTurn;
+  document.querySelectorAll('#actions [data-info],#arts [data-info]').forEach(b=>b.onclick=()=>{modalView='art:'+b.dataset.info;render();});
+  const bs=$('bStop');if(bs)bs.onclick=()=>{const a=LEG.find(x=>x.k==='bstop');if(a)doAction(a);};
+  const ba=$('bAgain');if(ba)ba.onclick=()=>{botToken++;paused=false;S=newState();H=[];ui={kinds:null,path:[],sel:null};modalView=null;render();};
+}
+let modalView=null;
+function pickArt(id){S.art[S.picker]=id;S.log.push(`${NAME[S.picker]}${isAI(S.picker)?' (computer)':''} chooses ${artById(id).name}`);if(S.picker==='b')S.picker='w';else{S.log.push('— White begins —');startTurn(S);}render();}
+let setup={bot:'b',level:'medium',wl:'medium',bl:'hard',minutes:0,limit:'off',arts:'on',hints:'on'};
+function renderSetup(m){
+  const opt=(k,v,l)=>`<button data-set="${k}" data-v="${v}" class="${String(setup[k])===String(v)?'primary':''}">${l}</button>`;
+  const lv=k=>`${opt(k,'easy','Easy')}${opt(k,'medium','Medium')}${opt(k,'hard','Hard')}`;
+  let diff='';
+  if(setup.bot==='b'||setup.bot==='w')diff=`<h3>Computer difficulty</h3><div class="btns">${lv('level')}</div>`;
+  if(setup.bot==='both')diff=`<h3>White computer</h3><div class="btns">${lv('wl')}</div><h3>Black computer</h3><div class="btns">${lv('bl')}</div><p class="hint">Watch mode: use ⏸ Pause in the header to stop and study the board, and ⏭ Step to play one action at a time.</p>`;
+  m.innerHTML=`<div class="modal"><div class="box" style="max-width:600px">${menuTitle()}
+  <h3>Players</h3><div class="btns">${opt('bot','none','Two players, one screen')}${opt('bot','b','Me (White) vs computer')}${opt('bot','w','Me (Black) vs computer')}${opt('bot','both','Watch: computer vs computer')}</div>
+  ${diff}${setup.bot==='b'||setup.bot==='w'?'<p class="hint">Easy makes loose, random-ish moves. Medium picks the best single action. Hard looks at both actions of its turn together. The computer chooses its own artifact.</p>':''}
+  <h3>Tournament rule: turn limit (100 turns)</h3><div class="btns">${opt('limit','on','On')}${opt('limit','off','Off')}</div><p class="hint">If no one has won after 100 turns (50 each), the side with more nobles on the board wins (a king counts as 2). Equal nobles is a draw.</p>
+  <h3>Artifacts</h3><div class="btns">${opt('arts','on','On')}${opt('arts','off','Off (no artifacts this game)')}</div>
+  <h3>Move hints</h3><div class="btns">${opt('hints','on','Tutorial (show move dots)')}${opt('hints','off','Fog of war (hide hints)')}</div><p class="hint">Fog of war hides move dots and playable-piece outlines. The red danger pulse on a last noble, the last-move highlight and your selected piece still show. You can switch this during play in ⚙ Settings.</p>
+  <h3>Time control</h3><div class="btns">${opt('minutes',0,'Untimed')}${opt('minutes',10,'10 min game')}${opt('minutes',20,'20 min game')}${opt('minutes',30,'30 min game')}</div>
+  <p class="hint">The time is split evenly: each player's clock gets half and runs only during that player's turns. A player whose clock reaches zero loses.</p>
+  <div class="btns" style="margin-top:12px"><button class="primary" id="mStart">${setup.arts==='on'?'Start — choose artifacts':'Start game'}</button><button id="mRules">Read the rulebook</button><button id="mLore">Read the lore</button><button id="mCredits">Credits</button><button id="mStyle">⚙ Settings</button></div></div></div>`;
+  m.querySelectorAll('[data-set]').forEach(b=>b.onclick=()=>{const k=b.dataset.set;setup[k]=k==='minutes'?+b.dataset.v:b.dataset.v;render();});
+  $('mStart').onclick=()=>{
+    const ai={w:null,b:null};
+    if(setup.bot==='b')ai.b=setup.level;if(setup.bot==='w')ai.w=setup.level;if(setup.bot==='both'){ai.w=setup.wl;ai.b=setup.bl;}
+    S.mode={ai,minutes:setup.minutes};S.rules.turnLimit=setup.limit==='on'?100:0;S.rules.artifacts=setup.arts==='on';S.rules.hints=setup.hints==='on';S.clock=setup.minutes?{w:setup.minutes*30000,b:setup.minutes*30000}:null;S.phase='pick';paused=false;
+    prefs.track='pursuit';musicPreview=false;savePrefs();
+    const who=setup.bot==='none'?'Two-player game':setup.bot==='both'?`Watch game — White computer (${ai.w}) vs Black computer (${ai.b})`:`Game vs computer (${setup.level}) — computer plays ${NAME[setup.bot]}`;
+    S.log.push(who+(setup.minutes?` · ${setup.minutes}-minute game (${setup.minutes/2} min each)`:' · untimed')+(S.rules.artifacts?'':' · no artifacts')+(S.rules.hints?'':' · fog of war'));
+    if(!S.rules.artifacts){S.log.push('— White begins —');startTurn(S);}
+    render();};
+  $('mRules').onclick=()=>{modalView='rules';render();};
+  $('mLore').onclick=()=>{modalView='lore';render();};
+  $('mCredits').onclick=()=>{modalView='credits';render();};
+  $('mStyle').onclick=()=>{modalView='style';render();};
+}
+function renderModal(){
+  const m=$('modal');
+  if(S.phase==='setup'&&!modalView){renderSetup(m);return;}
+  if(modalView==='style'){renderStyle(m);return;}
+  if(S.phase==='pick'){
+    let h=`<div class="modal"><div class="box"><h2>${NAME[S.picker]}${isAI(S.picker)?' (computer) is choosing…':' chooses an artifact'}</h2><div class="btns" style="justify-content:flex-end"><button id="pStyle" style="flex:0 0 auto">⚙ Settings</button></div><p class="hint">Black picks first, then White. Each artifact exists once, so the two sides always hold different ones. Artifacts can't be used on a player's first turn; once used, the figurine returns to the treasure box and the card to its box.</p><div class="grid3">`;
+    for(const a of ART){const taken=S.art.w===a.id||S.art.b===a.id;h+=`<div class="card pick${taken?' taken':''}" data-a="${a.id}"><div class="nm">${a.name}${taken?' — taken':''}</div>${artArt(a.id)}<div class="fg">Figurine: ${a.fig}</div><div class="cs">${a.cost}</div><div class="tx">${a.text}</div></div>`;}
+    m.innerHTML=h+'</div></div></div>';
+    const ps=$('pStyle');if(ps)ps.onclick=()=>{modalView='style';render();};
+    m.querySelectorAll('.pick').forEach(el=>el.onclick=()=>{if(isAI(S.picker))return;const id=el.dataset.a;if(S.art.w===id||S.art.b===id)return;pickArt(id);});
+    return;
+  }
+  if(modalView&&modalView.startsWith('art:')){const a=artById(modalView.slice(4));
+    m.innerHTML=`<div class="modal"><div class="box" style="max-width:600px"><h2>${a.name}</h2>${artArt(a.id,true)}<div class="card"><div class="fg">Figurine: ${a.fig}</div><div class="cs">Cost: ${a.cost}</div><div class="tx" style="font-size:17px">${a.text}</div><div class="hint">${ART_HOW[a.id]}</div></div><div class="btns"><button class="primary" id="mClose">Close</button></div></div></div>`;
+    $('mClose').onclick=()=>{modalView=null;render();};return;}
+  if(modalView==='style'){renderStyle(m);return;}
+  if(modalView==='credits'){m.innerHTML=`<div class="modal"><div class="box rules"><div class="rbclose"><button class="primary" id="mClose">✕ Close</button></div><h2>Credits</h2>
+    <p>Sounds are royalty-free. The two older pieces of music are CC0. The rest were brought in from Pixabay. Heartfelt Battle is not used.</p>
+    <table class="rbq"><tr><th>Where you hear it</th><th>Who made it</th></tr>
+    <tr><td>Menu, rulebook, lore</td><td>Cleyton Kauffman — Übermensch (CC0)</td></tr>
+    <tr><td>Match, first choice</td><td>Emma_MA — Determined Pursuit (CC0)</td></tr>
+    <tr><td>Match, second choice</td><td>Kaazoom — Embers on the Flagstone. First 23 seconds, looped.</td></tr>
+    <tr><td>While your noble is in danger</td><td>Fronbondi_Skegs — distant braam. Loops only during check.</td></tr>
+    <tr><td>Buttons</td><td>GameStudio — click</td></tr>
+    <tr><td>A capture</td><td>GameStudio — sword attack</td></tr>
+    <tr><td>Black wizard's flame</td><td>Flamethrower blast</td></tr>
+    <tr><td>Archmage fireball in the air</td><td>Floraphonic — fireball whoosh</td></tr>
+    <tr><td>Archmage fireball hits</td><td>Yodguard — fire magic. The long silence was cut.</td></tr>
+    <tr><td>White wizard's bolt</td><td>RescopicSound — elemental magic spell</td></tr>
+    <tr><td>White archmage, under the bolts</td><td>Magiaz — electricity, cut to 2 seconds</td></tr>
+    <tr><td>Wizard or archmage moves</td><td>GameStudio — cloud spread</td></tr>
+    <tr><td>A noble becomes a tower</td><td>GameStudio — stone</td></tr>
+    <tr><td>Tower shift</td><td>KostyaPL — impact whoosh. Trimmed.</td></tr>
+    <tr><td>Stacking</td><td>Poorartistt — sword drawn</td></tr>
+    <tr><td>A knight is recruited</td><td>PhatPhrogStudio — knight grunt</td></tr>
+    <tr><td>You win</td><td>Trumpet fanfare</td></tr>
+    </table>
+    <p class="hint">An ordinary step keeps the original slide. Unstack uses the stacking sound. Stacking two wizards uses a low magic tone. Promotion, restore, and a flip share one short flourish. Every artifact shares one magic chime. A loss has no fanfare.</p>
+    <div class="btns" style="margin-top:12px"><button class="primary" id="mClose2">Close</button></div></div></div>`;
+    const cl=()=>{modalView=null;render();};$('mClose').onclick=cl;$('mClose2').onclick=cl;return;}
+  if(modalView==='lore'){m.innerHTML=`<div class="modal"><div class="box rules"><div class="rbclose"><button class="primary" id="mClose">✕ Close</button></div>${lorePage()}<div class="btns" style="margin-top:12px"><button class="primary" id="mClose2">Close</button></div></div></div>`;
+    const cl=()=>{modalView=null;render();};$('mClose').onclick=cl;$('mClose2').onclick=cl;return;}
+  if(modalView==='rules'){m.innerHTML=`<div class="modal"><div class="box rules" id="rbBox"><div class="rbclose"><button class="primary" id="mClose">✕ Close rulebook</button></div>${rulebook()}<div class="btns" style="margin-top:12px"><button class="primary" id="mClose2">Close</button></div></div></div>`;
+    const cl=()=>{modalView=null;render();};$('mClose').onclick=cl;$('mClose2').onclick=cl;
+    m.querySelectorAll('[data-rb]').forEach(a=>a.onclick=()=>{const t=document.getElementById('rb-'+a.dataset.rb);if(t)t.scrollIntoView({behavior:'smooth',block:'start'});});return;}
+  if(modalView==='export'){
+    const txt=`Strahtura — playtest build v0.14 (rules log v8)\nWhite artifact: ${S.art.w?artById(S.art.w).name:'-'} · Black artifact: ${S.art.b?artById(S.art.b).name:'-'}\nResult: ${S.result||'in progress'}\n\n`+S.log.join('\n')+'\n\nPlaytest notes:\n';
+    m.innerHTML=`<div class="modal"><div class="box"><h2>Export game log</h2><p class="hint">Copy this and paste it back into our chat with your playtest notes.</p><textarea id="exTxt">${txt.replace(/</g,'&lt;')}</textarea><div class="btns" style="margin-top:8px"><button class="primary" id="mCopy">Copy</button><button id="mClose">Close</button></div><p class="hint" id="cpMsg"></p></div></div>`;
+    $('mClose').onclick=()=>{modalView=null;render();};
+    $('mCopy').onclick=async()=>{const t=$('exTxt');try{await navigator.clipboard.writeText(t.value);$('cpMsg').textContent='Copied.';}catch(e){t.select();$('cpMsg').textContent='Copy was blocked here — the text is selected; press Ctrl/Cmd+C.';}};
+    return;
+  }
+  m.innerHTML='';
+}
+/* ===================== RULEBOOK ===================== */
+function rbBoard(N,items,opt={}){
+  const cl=opt.cl||26,W=N*cl;let g='';
+  for(let r=0;r<N;r++)for(let c=0;c<N;c++)g+=`<rect x="${c*cl}" y="${r*cl}" width="${cl}" height="${cl}" fill="${(r+c)%2?'#9a6a3a':'#ecd9ab'}"/>`;
+  const C=v=>v*cl+cl/2;
+  for(const it of items){
+    const x=it.c*cl,y=it.r*cl;
+    if(it.shade)g+=`<rect x="${x}" y="${y}" width="${cl}" height="${cl}" fill="${it.shade}"/>`;
+    if(it.s)g+=mini(it.s,x-4,y-5,cl+8);
+    if(it.m==='dot')g+=`<circle cx="${C(it.c)}" cy="${C(it.r)}" r="${cl*.17}" fill="#2f7a2f"/>`;
+    if(it.m==='dot2')g+=`<circle cx="${C(it.c)}" cy="${C(it.r)}" r="${cl*.17}" fill="none" stroke="#2f7a2f" stroke-width="2.5"/>`;
+    if(it.m==='cap')g+=`<circle cx="${C(it.c)}" cy="${C(it.r)}" r="${cl*.44}" fill="none" stroke="#c0262b" stroke-width="3"/>`;
+    if(it.m==='stk')g+=`<rect x="${x+2}" y="${y+2}" width="${cl-4}" height="${cl-4}" rx="4" fill="none" stroke="#2a5fbf" stroke-width="3"/>`;
+    if(it.m==='por')g+=`<rect x="${x+2}" y="${y+2}" width="${cl-4}" height="${cl-4}" rx="4" fill="none" stroke="#7b3cc0" stroke-width="3" stroke-dasharray="4 3"/>`;
+    if(it.m==='ex')g+=`<circle cx="${C(it.c)}" cy="${C(it.r)}" r="${cl*.17}" fill="#7b3cc0"/>`;
+    if(it.m==='bolt')g+=`<path d="M${C(it.c)+2} ${y+3} L${C(it.c)-5} ${C(it.r)+1} L${C(it.c)+1} ${C(it.r)+1} L${C(it.c)-3} ${y+cl-3}" stroke="#e0a000" stroke-width="3" fill="none"/>`;
+  }
+  for(const[a,b,c2,d,col]of(opt.arrows||[]))g+=`<line x1="${C(b)}" y1="${C(a)}" x2="${C(d)}" y2="${C(c2)}" stroke="${col||'#2f7a2f'}" stroke-width="3" marker-end="url(#rbh-${(col||'#2f7a2f').slice(1)})" ${opt.dash?'stroke-dasharray="5 3"':''}/>`;
+  const defs=['2f7a2f','c0262b','7b3cc0','2a5fbf'].map(c=>`<marker id="rbh-${c}" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M0 0 L10 5 L0 10 Z" fill="#${c}"/></marker>`).join('');
+  return `<svg viewBox="0 0 ${W} ${W}" style="width:${Math.min(W,220)}px;max-width:100%;border:2px solid #3b2918" aria-hidden="true"><defs>${defs}</defs>${g}</svg>`;
+}
+const RB=(()=>{
+  const w=(t,n=1)=>({o:'w',t,n}),bk=(t,n=1)=>({o:'b',t,n});
+  const around=(r,c,dirs,max,m='dot')=>{const o=[];for(const[dr,dc]of dirs)for(let k=1;k<=max;k++){const rr=r+dr*k,cc=c+dc*k;if(rr<0||cc<0||rr>6||cc>6)break;o.push({r:rr,c:cc,m});}return o;};
+  const D={};
+  D.knight=rbBoard(7,[{r:5,c:3,s:w('knight')},{r:4,c:3,m:'dot'},{r:3,c:3,m:'dot2'},{r:4,c:2,s:bk('knight'),m:'cap'},{r:4,c:4,s:bk('knight'),m:'cap'}]);
+  D.cavalry=rbBoard(7,[{r:3,c:3,s:w('knight',2)},...around(3,3,DIAG,3)]);
+  D.noble=rbBoard(7,[{r:3,c:3,s:w('noble')},...around(3,3,ORTH,3)]);
+  D.king=rbBoard(7,[{r:3,c:3,s:w('noble',2)},...around(3,3,ALL8,1)]);
+  D.wizard=rbBoard(7,[{r:3,c:3,s:w('wizard')},...LJ.map(([a,b])=>({r:3+a,c:3+b,m:'dot'})),{r:2,c:3,s:bk('knight'),m:'bolt'}]);
+  D.archmage=rbBoard(7,[{r:3,c:3,s:w('wizard',2)},...LJ.map(([a,b])=>({r:3+a,c:3+b,m:'dot'})),{r:2,c:3,s:bk('tower'),m:'cap'},{r:1,c:4,s:bk('noble'),m:'cap'}]);
+  D.stack=rbBoard(5,[{r:3,c:2,s:w('knight')},{r:2,c:2,s:w('knight'),m:'stk'},{r:2,c:1,s:w('knight'),m:'stk'}],{arrows:[[3,2,2,2,'#2a5fbf']]});
+  D.portal=rbBoard(7,[{r:6,c:3,s:w('noble')},{r:3,c:3,s:w('tower'),m:'por'},...ALL8.map(([a,b])=>({r:3+a,c:3+b,m:(a===1&&b===0)?null:'ex'})),{r:4,c:3,shade:'#7b3cc044'}],{arrows:[[6,3,4,3,'#2f7a2f']]});
+  D.portalL=rbBoard(7,[{r:4,c:1,s:w('wizard')},{r:3,c:3,s:w('tower'),m:'por'},{r:4,c:2,shade:'#7b3cc066'}],{arrows:[[4,1,3,3,'#2f7a2f'],[3,3,4,2,'#7b3cc0']]});
+  D.check=rbBoard(5,[{r:3,c:1,s:w('noble'),m:'cap'},{r:0,c:1,s:bk('noble')},{r:3,c:2,m:'dot'},{r:3,c:3,m:'dot'},{r:3,c:4,m:'dot'}],{arrows:[[0,1,2,1,'#c0262b']]});
+  // setup board
+  const st=[];for(let c=0;c<8;c++){st.push({r:7,c,s:w(c===3||c===4?'noble':'knight')},{r:6,c,s:w('knight')},{r:0,c,s:bk(c===3||c===4?'noble':'knight')},{r:1,c,s:bk('knight')});}
+  D.setup=rbBoard(8,st,{cl:24});
+  // camp
+  let cg='';for(let c=0;c<8;c++){cg+=`<rect x="${c*24}" y="0" width="24" height="24" fill="${c%2?'#9a6a3a':'#ecd9ab'}"/><rect x="${c*24+3}" y="34" width="18" height="18" rx="3" fill="#2a1d12" stroke="#c9a24f" stroke-dasharray="3 2"/>`;}
+  cg+=mini({o:'w',t:'knight',n:1},3*24+4,35,16)+mini({o:'w',t:'knight',n:2},6*24+4,35,16)+mini({o:'b',t:'knight',n:1},6*24+2,2,20)+`<line x1="${3*24+12}" y1="33" x2="${3*24+12}" y2="16" stroke="#2f7a2f" stroke-width="3"/><text x="${6*24+12}" y="64" font-size="9" text-anchor="middle" fill="#c0262b">blocked</text>`;
+  D.camp=`<svg viewBox="0 0 192 68" style="width:260px;max-width:100%" aria-hidden="true">${cg}</svg>`;
+  return D;
+})();
+function rbPiece(name,diag,body){return `<div class="rbp"><div>${diag}</div><div><h4>${name}</h4>${body}</div></div>`;}
+function rulebook(){
+  const ch=(id,n,t)=>`<h3 id="rb-${id}"><span class="orn">❦</span> ${n}. ${t}</h3>`;
+  const toc=[['play','The Game'],['board','The Board'],['setup','Setup'],['turns','Turns and Actions'],['pieces','The Pieces'],['stack','Stacking and Unstacking'],['prestige','Prestige: Promotion, Towers and Restore'],['portal','Tower Shift'],['recruit','Recruiting and the Camp'],['check','Check and Desperate Measures'],['win','Winning and Drawing'],['art','The Artifacts'],['ref','Quick Reference']];
+  let h=`<div class="rb"><h2 class="rbt">⚜ The Book of Strahtura ⚜</h2><p class="rbs">Strahtura <i>(strah-TOO-rah)</i> · Rules for Play Strahtura v1.02</p>
+  <p class="dc"><b>New in v1.02.</b> A knight may retreat one square straight back, without capturing, onto an empty square, onto your own knight, or into your own tower or archmage. Front Line lets that knight jump the single knight directly ahead. An archmage may flip into an Archmage's Tower, which swaps with a friendly piece beside it and cannot be promoted. Stone Golem moves only a single Wizard Tower. Settings opened during a match close with the ✕ at the top right.</p>
+  <nav class="rbtoc">${toc.map(([id,t],i)=>`<a data-rb="${id}">${['I','II','III','IV','V','VI','VII','VIII','IX','X','XI','XII','XIII'][i]}. ${t}</a>`).join('')}</nav>`;
+  h+=ch('play','I','The Game')+`<p class="dc">Two empires meet on an eight-by-eight field. Each begins with fourteen knights and two nobles. Every piece is the same carved helm: stand it one way and it is a knight; turn it over and it is a crowned noble. Through stacking, flipping and trading, an empire gives up numbers to raise mightier pieces. This is <b>prestige</b>: fewer pieces, greater power.</p><p>You win by capturing <b>every enemy noble</b>. A king is two nobles, so both must fall.</p>`;
+  h+=ch('board','II','The Board')+`<p class="dc">Play on a standard 8×8 board. Off the board each side keeps:</p><ul><li><b>A camp</b>: eight dotted squares behind your back row, one behind each file, where recruits wait.</li><li><b>A half of the graveyard</b>: one large rectangle split in two. Pieces you capture go in <i>your</i> half; pieces you sacrifice go in your own half too.</li><li><b>An artifact square</b> with its card behind it, and behind that <b>two tower squares</b> showing how many Wizard Towers you can still raise.</li></ul>`;
+  h+=ch('setup','III','Setup')+`<div class="rbp"><div>${RB.setup}</div><div><p class="dc">Each side fills its back two rows. The two nobles stand on the d and e files of the back row, where a chess king and queen would stand; knights fill every other square.</p><p><b>Black chooses an artifact first</b>, then White. There is only one of each, so the sides always hold different artifacts. <b>White moves first.</b></p></div></div>`;
+  h+=ch('turns','IV','Turns and Actions')+`<ul><li>Your <b>first turn</b> has only <b>1 action</b>, and you may not stack or use your artifact on it; every turn after has <b>2</b>. Spend them in any mix.</li><li>Two moves must be made by <b>two different pieces</b>, except the king and a last-stand knight (see X).</li><li>You may <b>recruit at most once per turn</b> (only the Sellswords artifact brings more).</li><li>Each piece takes <b>one piece-action per turn</b>: a move, a ranged attack, a flip, an unstack or a trade.</li><li>Knights, cavalry, nobles and kings do not jump over pieces. A wizard and an archmage jump in an L. Front Line lets a knight jump the single knight directly in front of him.</li><li>You may end your turn early and give up unused actions, except while your last noble is in danger.</li><li><b>Frozen ❄</b>: a piece just stacked, unstacked, flipped or traded cannot move, attack or act again this turn. You also cannot stack onto a frozen piece. A king is the exception: while an action remains, the king is not frozen.</li></ul>`;
+  h+=ch('pieces','V','The Pieces')+
+   rbPiece('Knight',RB.knight,`<p>Moves 1 square forward. From your first or second row, on its first move, it may move 2 forward if both squares are open (1 action). It may <b>retreat</b> 1 square straight back onto an empty square, onto your own single knight, or into your own tower or archmage. A retreat never captures. Captures 1 square diagonally forward. <b>Front Line</b> jumps the single knight directly ahead and lands on the empty square beyond. It does not capture. On that knight's first move, while it is still on your first or second row, Front Line costs 1 action. After the knight has moved once, Front Line costs 2 actions. On reaching the enemy's back row a single knight is <b>automatically promoted</b> to a noble.</p>`)+
+   rbPiece('Cavalry (2 knights)',RB.cavalry,`<p>Moves and captures diagonally, up to 3 squares. A cavalry does not promote. Unstack it on the enemy back row and each single knight there promotes.</p>`)+
+   rbPiece('Noble',RB.noble,`<p>Moves and captures straight, up to 3 squares.</p>`)+
+   rbPiece('King (2 nobles)',RB.king,`<p>Moves and captures 1 square in any direction, and <b>may move twice in one turn</b> using both actions. A king is never frozen while an action remains, so two nobles may join and the king can still step that turn. A king counts as two nobles.</p>`)+
+   rbPiece('Wizard Tower',mini({o:'w',t:'tower',n:1},0,0,80).replace('<svg ','<svg style="width:80px" '),`<p>Raised by trading a noble (VII). It never moves on its own and <b>cannot be captured</b>, except by an archmage or an artifact. Stone Golem can move only this single tower. Your pieces pass through it with a Tower Shift (VIII).</p>`)+
+   rbPiece('Wizard',RB.wizard,`<p>Jumps in an L, like a chess knight, and captures where it lands. <b>Or</b>, instead of moving, it strikes the square directly in front of it: Black hurls a fireball, White calls lightning (1 action). A wizard either moves or strikes in a turn, never both.</p>`)+
+   rbPiece('Archmage (2 wizards)',RB.archmage,`<p>Moves and strikes like a wizard, and works as a tower for Tower Shifts. It can destroy an enemy Wizard Tower or an Archmage's Tower, by striking it or by moving onto it. It may <b>flip</b> into an Archmage's Tower. It does not swap places on its own.</p>`)+
+   rbPiece("Archmage's Tower",mini({o:'w',t:'tower',n:1},0,0,80).replace('<svg ','<svg style="width:80px" '),`<p>The flipped archmage. It does not step to an empty square. It swaps places with one of your own pieces on a touching square (1 action). That is how it moves through your line. It cannot capture, and it cannot be promoted or restored into a noble or a king. Flip it back into an archmage. Stone Golem cannot move it, because Stone Golem moves only a single Wizard Tower. An archmage or the Powder Keg can destroy it, and a single Wizard Tower using Stone Golem can step onto it and destroy it. Your pieces may still Tower Shift through it.</p>`)+
+   `<p>Any piece may capture any enemy piece or stack, except a tower. A captured stack goes to the graveyard whole.</p>`;
+  h+=ch('stack','VI','Stacking and Unstacking')+`<div class="rbp"><div>${RB.stack}</div><div><p class="dc">Move a piece onto a matching piece of your own to stack them, using its normal move. Knights stack forward, diagonally forward, or straight back. Knight + knight = cavalry, noble + noble = king, wizard + wizard = archmage. A stack holds at most 2, and a new stack is frozen this turn, except a king while an action remains.</p><p><b>Unstacking</b> (1 action) places the top piece on any open square touching the stack. It cannot capture or enter a tower, and both pieces are frozen this turn. An archmage may set its top wizard down as a tower. <i>In the playtest: double-tap or long-press a stack.</i></p></div></div>`;
+  h+=ch('prestige','VII','Prestige: Promotion, Towers and Restore')+`<p class="dc">Each trade costs 1 action, happens on the piece's own square, and leaves the new piece frozen.</p><ul><li><b>Promotion (Cavalry → Noble)</b>: only while the cavalry stands in the <b>enemy's half</b> of the board (the four rows nearest your opponent). Prestige is earned in battle. The top knight is sacrificed to your graveyard half (it can be recruited again); the bottom knight turns over as a noble.</li><li><b>Trade limit</b>: no trade into a noble (Cavalry → Noble, Tower or Wizard → Noble, Archmage → King) may leave you with more than <b>4 nobles</b> on the board, counting a king as 2. Promotion on the back row and Royal Decree are never limited. Flips, stacking, unstacking and Noble → Tower are not affected.</li><li><b>Noble → Wizard Tower</b>: only while a tower remains in your reserve, at most two per game. You may <b>never trade your last noble</b>. Any other noble of yours, anywhere on the board, is enough. If the trade leaves that noble in danger, your next action must get it out.</li><li><b>Restore</b>: a Tower or Wizard back to a Noble, an Archmage back to a King: the towers return to your reserve and can be raised again later.</li><li><b>Flip</b> a single tower to a wizard, a wizard to a tower, an archmage to an Archmage's Tower, or that tower back to an archmage (1 action). A flipped piece cannot move, strike, swap or stack that turn. An Archmage's Tower cannot be restored into a king.</li></ul><p>A tower, wizard or archmage that is captured or destroyed goes to the graveyard, and that tower can never be raised again.</p>`;
+  h+=ch('portal','VIII','Tower Shift')+`<div class="rbp"><div>${RB.portal}</div><div><p class="dc">Any of your pieces, even a knight, may move onto your own tower or archmage and step out onto any open square touching it, all in one action. It cannot capture or stack as it steps out. Enemies can never Tower Shift through yours.</p><p>Afterwards the tower <b>shifts one square toward the square the piece came from</b> (shaded).</p></div></div><div class="rbp"><div>${RB.portalL}</div><div><p>After a straight entry the tower shifts straight back. After a diagonal or L-shaped entry it shifts diagonally toward where the piece started. If that square is occupied or off the board, the tower <b>cannot be entered from that direction</b>.</p></div></div>`;
+    h+=ch('recruit','IX','Recruiting and the Camp')+`<div class="rbp"><div>${RB.camp}</div><div><p class="dc">Once per turn, recruiting (1 action) brings back one of <b>your own fallen knights</b>, captured or sacrificed, to an empty camp square of your choice, in full view of your opponent. You can only recruit knights that are actually in the graveyard, and only onto a camp square whose back-row square is <b>empty when you recruit</b>. One knight per camp square: only the Sellswords artifact can bring a cavalry pair, and it follows the same empty-square rule.</p><p>At the start of your next turn every recruit lands on the back-row square in front of its camp square and <b>may move and capture at once</b>, but it <b>cannot stack or be stacked onto</b> on the turn it lands. If something moves onto that square before then, the recruit waits in camp until it is clear. Pieces in camp cannot be captured.</p></div></div>`;
+  h+=ch('check','X','Check and Desperate Measures')+`<div class="rbp"><div>${RB.check}</div><div><p class="dc">Check applies only when an empire is down to <b>one noble piece</b>: a single noble or a king. That piece may never end in danger, meaning it could be captured by one enemy action. If it begins your turn in danger, your next action must end the danger by any means: move it, capture the attacker, block, or use an artifact. If nothing can, it is <b>checkmate</b> and you lose. With two or more noble pieces, check does not apply.</p></div></div><ul><li>A last noble moves only once per turn like any other noble, but you may still use your other action to recruit, use your artifact, or move another piece.</li><li><b>Last stand</b>: with only one noble and one knight left, that knight may move twice in one turn.</li></ul>`;
+  h+=ch('win','XI','Winning and Drawing')+`<ul><li>Capture every enemy noble and you win. A king counts as two.</li><li>If each side has only a single noble and nothing else, the game is a <b>stalemate</b> and a draw.</li><li><b>Tournament rule: turn limit (optional, off by default)</b>: after 100 turns, 50 each, the side with more nobles on the board wins (a king counts as 2). Equal nobles is a draw.</li><li><b>Game options</b> (setup screen): Artifacts on or off; Move hints as Tutorial (move dots shown) or Fog of war (no hints; the danger pulse on a last noble still shows).</li><li><b>Tournament rule: timed games</b> (10, 20 or 30 minutes per game) split the time evenly; your clock runs only on your turns. If your clock reaches zero, you lose.</li></ul>`;
+  h+=ch('art','XII','The Artifacts')+`<p class="dc">Each side holds one artifact, shown as a figurine with its card. Artifacts cannot be used on your first turn. Once used, the figurine returns to the treasure box and its card to the card box.</p><div class="grid3">`+ART.map(a=>`<div class="card"><div class="nm">${a.name}</div>${artArt(a.id)}<div class="fg">Figurine: ${a.fig}</div><div class="cs">${a.cost}</div><div class="tx">${a.text}</div></div>`).join('')+`</div>`;
+  h+=ch('ref','XIII','Quick Reference')+`<table class="rbq"><tr><th>Piece</th><th>Move</th><th>Capture</th></tr>
+  <tr><td>Knight</td><td>1 forward; 2 forward on its first move from rows 1–2; 1 straight back; Front Line</td><td>1 diagonally forward. Retreat and Front Line do not capture</td></tr>
+  <tr><td>Cavalry</td><td colspan="2">Diagonal, up to 3</td></tr>
+  <tr><td>Noble</td><td colspan="2">Straight, up to 3</td></tr>
+  <tr><td>King</td><td colspan="2">1 any direction; may move twice</td></tr>
+  <tr><td>Wizard</td><td>L-jump</td><td>L-jump, or strike 1 ahead</td></tr>
+  <tr><td>Archmage</td><td>L-jump; Tower Shift; may flip into an Archmage's Tower</td><td>As wizard; destroys either tower</td></tr>
+  <tr><td>Archmage's Tower</td><td>Swap with an adjacent friendly piece; Tower Shift</td><td>Cannot capture or be promoted. Destroyed like a tower</td></tr>
+  <tr><td>Tower</td><td colspan="2">Never moves on its own; Stone Golem may step a single tower; cannot be captured</td></tr></table>
+  <table class="rbq" style="margin-top:10px"><tr><th>Prestige action</th><th>What it does</th></tr>
+  <tr><td>Promotion</td><td>Knight on the enemy back row becomes a noble (always). Cavalry in the enemy half becomes a noble (1 action, top knight sacrificed, trade limit 4)</td></tr>
+  <tr><td>Noble → Tower</td><td>Noble trades for a Wizard Tower from your reserve (1 action, max 2 towers)</td></tr>
+  <tr><td>Restore</td><td>Tower or wizard back to a noble, archmage back to a king (1 action, trade limit 4)</td></tr>
+  <tr><td>Tower Shift</td><td>Pass through your tower or archmage to an open square beside it; the tower shifts back</td></tr>
+  <tr><td>Recruit</td><td>One fallen knight per turn to an open camp square</td></tr></table>`;
+  return h+'</div>';
+}
+
+
+/* ===================== LORE ===================== */
+function lorePage(){
+  const king=(o)=>{const src=o==='w'?'art/lore/fulgar-king.jpg':'art/lore/angtapa-king.jpg';const name=o==='w'?'King of Fulgar':'King of Angtapa';return `<div class="loreking" title="${name}"><img src="${src}" alt="${name}"></div>`;};
+  return `<div class="rb lore"><h2 class="rbt">⚜ The Kings' Accord ⚜</h2><p class="rbs">How Strahtura <i>(strah-TOO-rah)</i> ended the Long War</p>
+  <div class="lorekings">${king('w')}<span style="font-family:Cinzel;font-size:22px;color:#8a2020">⚔</span>${king('b')}</div>
+  <p class="rbs" style="margin-top:0"><b>The Fulgar Empire</b> (White, the lightning) &nbsp;·&nbsp; <b>The Angtapa Empire</b> (Black, the fire)</p>
+
+  <h3><span class="orn">❦</span> I. The Long War</h3>
+  <p class="dc">Two empires faced each other across a single valley. To the west stood the <b>Fulgar Empire</b>, whose name in its old tongue means <i>lightning</i>. Its court wizards called down storms from the white cliffs. To the east stood the <b>Angtapa Empire</b>, named in its sacred tongue for <i>agni</i>, fire, and <i>tapas</i>, the inner heat of discipline. Its sages hurled flame from the black hills.</p>
+  <p>For three generations the two empires made war. Grandfathers fell, then fathers, and in the end sons were sent to die over fields no one living could remember the reason for. Each spring the armies met, each autumn they counted the dead, and each winter both empires grew poorer. In the war's ninetieth year a harvest failed on both sides of the valley. Neither king could feed another campaign, and neither would be the first to kneel.</p>
+
+  <h3><span class="orn">❦</span> II. The Two Kings Meet</h3>
+  <p class="dc">Under a white flag, in a ruined chapel at the valley's heart, the two kings met for the first time. Each brought his marshal, his court wizard and a single box. The Fulgar King's box held the helms of his knights. The Angtapa King's held the crowns of every lord he had lost.</p>
+  <p>The old abbess who kept the chapel turned one of the helms over in her hands. Upside down, its visor became a crown. <i>"Your knights and your lords are the same men,"</i> she said, <i>"only turned a different way. A knight already stands on the lowest step of nobility. Let him climb by his deeds. Settle your war with them, and let the board bleed instead of the valley."</i></p>
+
+  <h3><span class="orn">❦</span> III. The Name</h3>
+  <p class="dc">Neither king would let the game carry only his enemy's tongue. So the abbess joined them: the western word for the art of generals, <i>strategy</i>, and the eastern sages' word for cleverness, <i>chatura</i>. The game became <b>Strahtura</b>, clever strategy in the language of both empires, just as Fulgar and Angtapa had each named themselves for the power of their wizards.</p>
+
+  <h3><span class="orn">❦</span> IV. The Ladder of Prestige</h3>
+  <p class="dc">The abbess taught that every soldier on the board may rise. A <b>knight</b> fights on foot. Two who ride together become <b>cavalry</b>, mounted knights. A knight who reaches the enemy's last line, or cavalry who fight their way onto enemy soil, earn a title and are <b>promoted</b> to <b>nobles</b>. Two nobles who join their houses rise to a <b>king</b>.</p>
+  <p>A noble may also leave the court to study the arcane. His tower rises where he stood, and from it he steps out as a <b>wizard</b>. Two wizards together become an <b>archmage</b>, a wizard standing on his own tower. Yet a wizard never stops being a lord: he may always <b>restore</b> himself to his title at court.</p>
+
+  <h3><span class="orn">❦</span> V. The Terms of the Kings' Accord</h3>
+  <p class="dc">So the two kings wrote the Kings' Accord, and its law became the rules of Strahtura:</p>
+  <ul>
+  <li><b>Two commands each dawn.</b> No general of the Long War could ever do just one thing, so each turn grants two actions.</li>
+  <li><b>The challenged chooses the relic; the challenger strikes first.</b> Angtapa had been challenged, so Black chooses an artifact first and White moves first.</li>
+  <li><b>Titles are earned on enemy soil.</b> No empire may buy a lordship at home: cavalry may be promoted only in the enemy's half of the field.</li>
+  <li><b>No empire may raise more than four lords by bargain.</b> Titles won by trade are limited; titles won by valor are not.</li>
+  <li><b>The fallen may be recruited back,</b> one each dawn, each to a camp the enemy can see. The Accord forbade ambush by reinforcement.</li>
+  <li><b>The towers belong to the wizards.</b> None may take them but an archmage. Through a tower a commander's troops may pass, a <b>tower shift</b>, and every passage pushes the tower back toward the one who used it.</li>
+  <li><b>When an empire has but one lord left,</b> he must never be placed in harm's way, and if he cannot escape, the empire has lost.</li>
+  </ul>
+
+  <h3><span class="orn">❦</span> VI. The Relics</h3>
+  <p class="dc">Each empire laid one relic on the table beside the board, a memory of the Long War: the hidden archers of the Weeping Ridge, the stone golem that broke the siege of Harrowgate, the royal decree of a king who once titled a stable boy, the war banner, the sellswords from across the sea, the berserker of the northern shore, the sapper's powder keg, the blink rune, the flanking flag and the shield wall. A relic could be used once, then sealed back in the treasure box, because no one should win a war twice by the same trick.</p>
+
+  <h3><span class="orn">❦</span> VII. The Game That Ended the War</h3>
+  <p class="dc">The kings played for seven nights. The chronicles disagree on who won. The Fulgar chroniclers say their king's last knight crossed the board and was crowned on the final night. The Angtapa chroniclers say their king stalemated him and called it victory. Both agree on what came after: the losing empire opened its granaries to the winner's hungry, and the winner opened its roads to the loser's trade. Neither army marched again.</p>
+  <p>Ever since, when Fulgar and Angtapa cannot agree, they do not raise spears. They set out the helms, turn two of them into crowns, and play Strahtura.</p>
+  <p class="rbs" style="margin-top:14px">— from the Chronicle of the Ruined Chapel</p></div>`;
+}
+
+/* ===================== HEADER BUTTONS ===================== */
+$('cAuto').checked=autoEnd;
+$('cAuto').onchange=e=>{autoEnd=e.target.checked;try{localStorage.setItem('pc_autoEnd',autoEnd?'1':'0');}catch(err){}render();};
+$('bPause').onclick=()=>{paused=!paused;botToken++;render();};
+$('bStep').onclick=()=>{if(!paused||!botTurn())return;const level=S.mode.ai[S.turn];if(S.actionsLeft<=0&&!S.berserk){doEndTurn();return;}const a=botChoose(S,level);if(!a){if(S.berserk){const st=LEG.find(x=>x.k==='bstop');if(st){doAction(st);return;}}doEndTurn();return;}doAction(a);};
+let lastTick=performance.now();
+setInterval(()=>{
+  const now=performance.now(),dt=now-lastTick;lastTick=now;
+  if(!S.clock||S.phase!=='play'||S.winner||paused)return;
+  S.clock[S.turn]-=dt;
+  if(S.clock[S.turn]<=0){S.clock[S.turn]=0;S.winner=opp(S.turn);S.result=`Time — ${NAME[S.turn]}'s clock ran out. ${NAME[opp(S.turn)]} wins.`;S.log.push(`★ ${S.result}`);botToken++;render();return;}
+  updClocks();
+},250);
+$('bUndo').onclick=()=>{if(!H.length)return;botToken++;const ck=S.clock,wn=S.winner&&S.result.startsWith('Time');S=JSON.parse(H.pop());while(H.length&&isAI(S.turn)&&!(S.mode.ai.w&&S.mode.ai.b)&&S.phase==='play')S=JSON.parse(H.pop());if(ck&&!wn)S.clock=ck;ui={kinds:null,path:[],sel:null};render();};
+$('bForfeit').onclick=()=>{
+  if(S.phase!=='play'||S.winner)return;
+  if(!confirmForfeit){confirmForfeit=true;$('bForfeit').textContent='Click again to forfeit';setTimeout(()=>{confirmForfeit=false;const b=$('bForfeit');if(b)b.textContent='Forfeit';},2500);return;}
+  confirmForfeit=false;$('bForfeit').textContent='Forfeit';
+  const loser=S.turn,winner=opp(loser);
+  H.push(JSON.stringify(S));botToken++;
+  S.winner=winner;S.result=`Forfeit — ${NAME[loser]} resigns. ${NAME[winner]} wins.`;S.log.push(`★ ${S.result}`);
+  ui={kinds:null,path:[],sel:null};playFx('win');render();
+};
+$('bStyle').onclick=()=>{modalView='style';render();};
+$('bMusic').onclick=()=>{prefs.music=prefs.music===false?true:false;savePrefs();syncMusic(true);markMusic();};
+$('bNew').onclick=()=>{if(!confirmNew){confirmNew=true;$('bNew').textContent='Click again to confirm';setTimeout(()=>{confirmNew=false;$('bNew').textContent='New game';},2500);return;}confirmNew=false;$('bNew').textContent='New game';botToken++;paused=false;prefs.track='pursuit';musicPreview=false;savePrefs();S=newState();H=[];ui={kinds:null,path:[],sel:null};modalView=null;render();};
+window.addEventListener('resize',()=>{if(document.body.classList.contains('sheet'))fitSheet();});
+window.PC={get S(){return S},set S(v){S=v},botChoose,evalS,botPickArt,newState,gen,legalActions,apply,startTurn,endTurn,inDanger,checkApplies,render};
+render();
+</script>
+</body>
+</html>
