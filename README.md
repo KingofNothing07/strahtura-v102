@@ -12,7 +12,7 @@ On a phone, open that link and choose **Add to Home Screen**. The icon is the bo
 
 For ninety years Fulgar and Angtapa bled the same valley. Lightning from the white cliffs. Fire from the black hills. When neither king could feed another spring, they met in a ruined chapel and set the war down on a board.
 
-A helm turned one way is a knight. Turned over, it is a noble. Two knights ride as cavalry. Two nobles become a king. A lord may leave court, raise a tower, and step out as a wizard. An archmage can turn that power into a tower that walks through your own line: lightning on Fulgar stone, flame on Angtapa stone.
+A helm turned one way is a knight. Turned over, it is a noble. Two knights ride as cavalry. Two nobles become a king. A lord may leave court, raise a tower, and step out as a wizard. Two wizards make an archmage, and an archmage may flip into an Archmage's Tower: a larger gate your own pieces pass through, then push back the way they came.
 
 You have two commands each turn. A knight steps forward, captures on the diagonal, retreats one square, or uses Front Line to jump the knight directly ahead. Spend the other command to stack, trade a title, recruit a fallen knight in full view of the enemy, or break the seal on the one relic you brought. There is only one of each relic. Black chooses first. White strikes first.
 
