@@ -520,7 +520,13 @@ function pieceSVG(s,cls='pc'){
 /* ===================== COMPUTER OPPONENT ===================== */
 const VAL={knight:[1,3],noble:[5,7],wizard:[5,6],tower:[5,5]}; // the computer's private piece weights for judging positions (not a player-facing points system)
 const val=s=>VAL[s.t][s.n-1];
-const ART_KEEP={easy:0.3,medium:1.5,hard:2.5}; // value of still holding the artifact: higher = waits for a stronger moment
+const ART_KEEP={easy:0.15,medium:0.8,hard:2.1}; // value of still holding the artifact: higher = waits for a stronger moment
+const ART_ACT=new Set(['archers','golem','decree','banner','sell','berserk','keg','blink','flank','shield']);
+const ART_W={
+  medium:{archers:5,berserker:5,banner:4,decree:3,golem:2,shield:2,keg:2,flank:2,sellswords:2,blink:1},
+  hard:{decree:5,golem:5,blink:4,berserker:4,archers:4,shield:4,keg:3,sellswords:3,banner:2,flank:2}
+};
+const ART_ANSWER={archers:'shield',berserker:'shield',banner:'archers',decree:'berserker',golem:'keg',keg:'blink',blink:'shield',sellswords:'archers',flank:'banner',shield:'decree'};
 const CAPK=['ranged','archers','golem','berserk','bstep','keg'];
 function cover(S,r,c){ // squares this piece could capture on if an enemy stood there
   const s=S.b[r][c],p=s.o,f=fwd(p),o=[];
@@ -609,47 +615,78 @@ function replyValue(T,me){ // opponent answers with its best reply turn (up to 2
   return worst;
 }
 function repPen(S,T){const k=posKey(T);return (S.recent||[]).filter(x=>x===k).length*2.5;}
+function artUseBias(S,a,level){
+  if(level==='easy'||!ART_ACT.has(a.k))return 0;
+  const tgt=a.to&&S.b[a.to[0]]&&S.b[a.to[0]][a.to[1]];
+  const kill=!!(tgt&&tgt.o!==S.turn&&(a.mode==='capture'||a.mode==='destroy'||a.k==='archers'||a.k==='keg'));
+  if(a.k==='archers')return level==='hard'?(tgt&&tgt.n===2?1.1:0.35):0.9;
+  if(a.k==='decree')return level==='hard'?0.5:1.1;
+  if(a.k==='berserk')return level==='hard'?0.35:0.8;
+  if(kill&&tgt&&(tgt.t==='tower'||tgt.t==='noble'||tgt.n===2))return level==='hard'?0.7:1;
+  if(kill)return level==='medium'?0.65:0.1;
+  if(a.k==='flank'&&(a.mode==='stack'||a.mode==='portal'))return 0.55;
+  if(a.k==='sell')return level==='medium'?0.45:0.15;
+  if(a.k==='banner'&&(kill||a.mode==='capture'))return 0.5;
+  if(level==='medium'&&(a.k==='blink'||a.k==='flank'||a.k==='shield'))return -0.3;
+  return 0;
+}
 function botChoose(S,level){
   const me=S.turn,L=legalActions(S);
   if(!L.length)return null;
-  if(level==='easy'){ // mostly grabs points, sometimes careless
+  if(level==='easy'){ // spends the artifact early and otherwise grabs points
     if(S.berserk)return L.find(a=>a.k==='bstep')||L[0];
+    const arts=L.filter(a=>ART_ACT.has(a.k));
+    if(arts.length&&Math.random()<0.72){
+      const hot=arts.filter(a=>a.mode==='capture'||a.mode==='destroy'||a.k==='archers'||a.k==='berserk'||a.k==='decree'||a.k==='keg');
+      const pool=hot.length&&Math.random()<0.8?hot:arts;
+      return pool[Math.floor(Math.random()*pool.length)];
+    }
     if(Math.random()<0.3)return L[Math.floor(Math.random()*L.length)];
     return L.map(a=>({a,v:afterVal(S,a,me,'easy').v+Math.random()*1.5})).sort((x,y)=>y.v-x.v)[0].a;
   }
-  const sc=L.map(a=>afterVal(S,a,me,level)).sort((x,y)=>y.v-x.v);
+  const sc=L.map(a=>{const r=afterVal(S,a,me,level);r.b=artUseBias(S,a,level);return r;}).sort((x,y)=>(y.v+y.b)-(x.v+x.b));
   if(S.berserk)return sc[0].a;
-  if(level==='medium'){ // plans both of its actions together; judges position, noble safety and threats
+  if(level==='medium'){ // plans both of its actions; spends the artifact on a clear hit
     let best=sc[0],bv=-Infinity;
     for(const c of sc.slice(0,8)){
-      let v=c.v;
+      let v=c.v+c.b;
       v-=repPen(S,c.T);
-      if(!c.T.winner&&c.T.actionsLeft>0&&!c.T.berserk)for(const a2 of legalActions(c.T)){const r=afterVal(c.T,a2,me,level);const rv=r.v-repPen(S,r.T);if(rv>v)v=rv;}
+      if(!c.T.winner&&c.T.actionsLeft>0&&!c.T.berserk)for(const a2 of legalActions(c.T)){const r=afterVal(c.T,a2,me,level);const rv=r.v+artUseBias(c.T,a2,level)-repPen(S,r.T);if(rv>v)v=rv;}
       v+=Math.random()*0.15;
       if(v>bv){bv=v;best=c;}
     }
     return best.a;
   }
-  // hard: plans both actions, then checks each plan against the opponent's best reply turn
+  // hard: plans both actions, holds the artifact unless the moment is worth it, then checks the opponent's reply
   let best=sc[0],bv=-Infinity;
   for(const c of sc.slice(0,8)){
     let v;
     if(c.T.winner)v=evalS(c.T,me,level);
     else{
-      const blend=(T,st)=>0.45*st+0.55*replyValue(T,me)-repPen(S,T); // own plan quality, checked against the opponent's best reply
-      v=blend(c.T,c.v);
+      const blend=(T,st)=>0.45*st+0.55*replyValue(T,me)-repPen(S,T);
+      v=blend(c.T,c.v)+c.b;
       if(c.T.actionsLeft>0&&!c.T.berserk){
         const L2=legalActions(c.T).map(a=>afterVal(c.T,a,me,level)).sort((x,y)=>y.v-x.v).slice(0,7);
-        for(const d of L2){const rv=d.T.winner?evalS(d.T,me,level):blend(d.T,d.v);if(rv>v)v=rv;}
+        for(const d of L2){const rv=(d.T.winner?evalS(d.T,me,level):blend(d.T,d.v))+artUseBias(c.T,d.a,level);if(rv>v)v=rv;}
       }
     }
-    v+=Math.random()*0.1; // slight variety so Hard doesn't replay identical games
+    v+=Math.random()*0.1;
     if(v>bv){bv=v;best=c;}
   }
   return best.a;
 }
-const BOT_ART=['archers','berserker','banner','shield','decree','blink','sellswords','flank','keg','golem'];
-function botPickArt(S,level){const free=ART.map(a=>a.id).filter(id=>S.art.w!==id&&S.art.b!==id);if(level==='easy')return free[Math.floor(Math.random()*free.length)];return BOT_ART.find(id=>free.includes(id));}
+function botPickArt(S,level){
+  const free=ART.map(a=>a.id).filter(id=>S.art.w!==id&&S.art.b!==id);
+  if(!free.length)return null;
+  if(level==='easy'||!ART_W[level])return free[Math.floor(Math.random()*free.length)];
+  const w=Object.assign({},ART_W[level]);
+  const theirs=S.art[opp(S.picker)];
+  const answer=theirs&&ART_ANSWER[theirs];
+  if(answer&&free.includes(answer))w[answer]=(w[answer]||1)+(level==='hard'?4:1);
+  const bag=[];
+  for(const id of free)for(let i=0;i<(w[id]||1);i++)bag.push(id);
+  return bag[Math.floor(Math.random()*bag.length)];
+}
 let botToken=0;
 function scheduleBot(){
   const tok=++botToken;
@@ -1341,7 +1378,7 @@ function renderSetup(m){
   if(setup.bot==='both')diff=`<h3>White computer</h3><div class="btns">${lv('wl')}</div><h3>Black computer</h3><div class="btns">${lv('bl')}</div><p class="hint">Watch mode: use ⏸ Pause in the header to stop and study the board, and ⏭ Step to play one action at a time.</p>`;
   m.innerHTML=`<div class="modal"><div class="box" style="max-width:600px">${menuTitle()}
   <h3>Players</h3><div class="btns">${opt('bot','none','Two players, one screen')}${opt('bot','b','Me (White) vs computer')}${opt('bot','w','Me (Black) vs computer')}${opt('bot','both','Watch: computer vs computer')}</div>
-  ${diff}${setup.bot==='b'||setup.bot==='w'?'<p class="hint">Easy makes loose, random-ish moves. Medium picks the best single action. Hard looks at both actions of its turn together. The computer chooses its own artifact.</p>':''}
+  ${diff}${setup.bot==='b'||setup.bot==='w'?'<p class="hint">Easy plays loose and spends its artifact early. Medium takes a direct artifact and uses it to capture. Hard picks a plan, answers yours when it chooses second, and holds the artifact for a better moment.</p>':''}
   <h3>Tournament rule: turn limit (100 turns)</h3><div class="btns">${opt('limit','on','On')}${opt('limit','off','Off')}</div><p class="hint">If no one has won after 100 turns (50 each), the side with more nobles on the board wins (a king counts as 2). Equal nobles is a draw.</p>
   <h3>Artifacts</h3><div class="btns">${opt('arts','on','On')}${opt('arts','off','Off (no artifacts this game)')}</div>
   <h3>Move hints</h3><div class="btns">${opt('hints','on','Tutorial (show move dots)')}${opt('hints','off','Fog of war (hide hints)')}</div><p class="hint">Fog of war hides move dots and playable-piece outlines. The red danger pulse on a last noble, the last-move highlight and your selected piece still show. You can switch this during play in ⚙ Settings.</p>
