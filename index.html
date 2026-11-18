@@ -213,6 +213,8 @@ select option{background:#fbf2dc;color:#2d1f10}
 </defs></svg>
 <script>
 "use strict";
+const PACK={};
+function asset(p){return PACK[p]||p;}
 /* ===================== DATA ===================== */
 const FILES='abcdefgh', NAME={w:'White',b:'Black'};
 let prefs={piece:'woodcut',board:'classic',sound:true,music:true,vol:100,track:'pursuit',playing:'menu',motion:!(window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches)};
@@ -518,7 +520,7 @@ function endTurn(S){S.recent=(S.recent||[]).concat(posKey(S)).slice(-16);S.first
 function pieceName(s){return s.t==='knight'?(s.n===2?'cavalry':'knight'):s.t==='noble'?(s.n===2?'king':'noble'):s.t==='wizard'?(s.n===2?'archmage':'wizard'):(s.n===2?'atower':'tower');}
 function pieceFile(s){
   const folder=prefs.piece==='woodhelm'?'woodhelm':'woodcut';
-  return `art/sprites/${folder}/${s.o}-${pieceName(s)}.png`;
+  return asset(`art/sprites/${folder}/${s.o}-${pieceName(s)}.png`);
 }
 function pieceSVG(s,cls='pc'){
   const big=s.t==='tower'&&s.n===2?' big':'';
@@ -802,7 +804,7 @@ function animSpec(S,a){
   }
   return null;
 }
-function fxAudio(file,vol){const a=new Audio('sfx/'+file);a.preload='auto';a.volume=vol;return a;}
+function fxAudio(file,vol){const a=new Audio(asset('sfx/'+file));a.preload='auto';a.volume=vol;return a;}
 const FX={
   click:fxAudio('click.mp3',.4), capture:fxAudio('capture.mp3',.7), flame:fxAudio('flame.mp3',.55),
   whoosh:fxAudio('fire-whoosh.mp3',.6), boom:fxAudio('fire-boom.mp3',.72), bolt:fxAudio('lightning.mp3',.6),
@@ -1109,11 +1111,11 @@ function artArt(id,big){
    case'charge':d=P({o:'w',t:'noble',n:1},3,1)+P(B,0,1)+ar(3,1,0,1,'#c0262b')+X(0,1);break;
   }
   const defs=['2f7a2f','c0262b','7b3cc0'].map(c=>`<marker id="ah-${id}-${c}" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M0 0 L10 5 L0 10 Z" fill="#${c}"/></marker>`).join('');
-  return `<svg viewBox="0 0 280 164" style="width:100%;max-width:${big?520:300}px;display:block;margin:4px auto" aria-hidden="true"><defs>${defs}</defs><rect x="2" y="8" width="108" height="148" rx="10" fill="#fbf2dc" stroke="#b8892b" stroke-width="2"/><image href="art/plaques/${id}.png" x="8" y="20" width="96" height="128" preserveAspectRatio="xMidYMid meet"/>${g}${d}<rect x="${x0}" y="${y0}" width="${cl*4}" height="${cl*4}" fill="none" stroke="#3b2918" stroke-width="2"/></svg>`;
+  return `<svg viewBox="0 0 280 164" style="width:100%;max-width:${big?520:300}px;display:block;margin:4px auto" aria-hidden="true"><defs>${defs}</defs><rect x="2" y="8" width="108" height="148" rx="10" fill="#fbf2dc" stroke="#b8892b" stroke-width="2"/><image href="${asset('art/plaques/'+id+'.png')}" x="8" y="20" width="96" height="128" preserveAspectRatio="xMidYMid meet"/>${g}${d}<rect x="${x0}" y="${y0}" width="${cl*4}" height="${cl*4}" fill="none" stroke="#3b2918" stroke-width="2"/></svg>`;
 }
 
 /* ===================== MUSIC ===================== */
-const MUSIC={menu:new Audio('music/epic-menu-loop.mp3'),pursuit:new Audio('music/determined-pursuit.mp3'),embers:new Audio('music/embers.mp3'),check:new Audio('sfx/check-loop.mp3')};
+const MUSIC={menu:new Audio(asset('music/epic-menu-loop.mp3')),pursuit:new Audio(asset('music/determined-pursuit.mp3')),embers:new Audio(asset('music/embers.mp3')),check:new Audio(asset('sfx/check-loop.mp3'))};
 MUSIC.menu.loop=MUSIC.pursuit.loop=MUSIC.embers.loop=MUSIC.check.loop=true;
 MUSIC.menu.volume=0.16;MUSIC.pursuit.volume=MUSIC.embers.volume=0.22;MUSIC.check.volume=0.42;
 let musicNow=null,musicPreview=false;
@@ -1140,8 +1142,8 @@ function pinMenuTools(){
   if(!document.body.classList.contains('sheet'))return;
   const bar=document.createElement('div');
   bar.className='menutop';
-  const zip=location.protocol==='file:'?'https://github.com/KingofNothing07/strahtura-v102/raw/main/Strahtura-v1.02.zip':'Strahtura-v1.02.zip';
-  bar.innerHTML=`<a id="mZip" href="${zip}" download="Strahtura-v1.02.zip">Download</a><button type="button" id="mMusic"></button>`;
+  const file=location.protocol==='file:'?'https://kingofnothing07.github.io/strahtura-v102/Play%20Strahtura.html':'Play%20Strahtura.html';
+  bar.innerHTML=`<a id="mZip" href="${file}" download="Play Strahtura.html">Download</a><button type="button" id="mMusic"></button>`;
   box.insertBefore(bar, box.firstChild);
   $('mMusic').onclick=()=>{prefs.music=prefs.music===false?true:false;savePrefs();syncMusic(true);markMusic();};
   markMusic();
@@ -1152,7 +1154,7 @@ function fitSheet(){
   if(menu){const h=document.querySelector('header');document.documentElement.style.setProperty('--head',((h&&h.offsetHeight)||64)+'px');}
 }
 function empireCrest(o){
-  const src=o==='w'?'art/lore/fulgar-crest.jpg':'art/lore/angtapa-crest.jpg';
+  const src=asset(o==='w'?'art/lore/fulgar-crest.jpg':'art/lore/angtapa-crest.jpg');
   const name=o==='w'?'Fulgar Empire':'Angtapa Empire';
   return `<img src="${src}" alt="${name}">`;
 }
@@ -1318,7 +1320,7 @@ function artCard(p){
     else btn=`<button class="primary" data-art="${id}">${ui.kinds&&ui.kinds.includes(ARTK[id][0])?'Choosing… (click to cancel)':'Use '+a.name}</button>`;
   }
   const state=S.artUsed[p]?'Used — back in the treasure box':S.first[p]?'Not usable on your first turn':'Ready';
-  return `<div class="card ${S.artUsed[p]?'used':''}"><div class="nm" style="display:flex;justify-content:space-between;align-items:center">${a.name}<button data-info="${id}" style="font-size:13px;padding:1px 8px">ⓘ Card</button></div><img class="plaque" src="art/plaques/${id}.png" alt=""><div class="cs">${a.cost}</div><div class="tx">${a.text}</div><div class="hint">${state}</div>${btn}</div>`;
+  return `<div class="card ${S.artUsed[p]?'used':''}"><div class="nm" style="display:flex;justify-content:space-between;align-items:center">${a.name}<button data-info="${id}" style="font-size:13px;padding:1px 8px">ⓘ Card</button></div><img class="plaque" src="${asset('art/plaques/'+id+'.png')}" alt=""><div class="cs">${a.cost}</div><div class="tx">${a.text}</div><div class="hint">${state}</div>${btn}</div>`;
 }
 function renderRight(){
   const p=S.turn;let hArts='',h='';
@@ -1556,7 +1558,7 @@ function rulebook(){
    rbPiece('Wizard Tower',`<div>${RB.portal}<p class="hint" style="text-align:center">Green stops just inside the tower. Purple starts just inside and leaves. Gold, dotted, points back at the way in.</p></div>`,`<p>Raised by trading a noble (VII). It stands where it is raised. An archmage, Sapper's Sacrifice, or Stone Golem can destroy it. Stone Golem can also step it one square.</p><p>A piece steps onto it, then out to <b>one open square touching the tower</b>. The green arrow only just enters the tower square. The purple arrow starts the same small way inside, and the purple dots are every square it may leave by. The dotted gold arrow points back toward the entry: that is the tower pushing one square that way. A piece coming from farther away, or a wizard jumping in by an L, uses the same three arrows. The piece stops on the square it steps out to. If the square the tower would push onto is occupied or off the board, the piece cannot enter from that side.</p>`)+
    rbPiece('Wizard',RB.wizard,`<p>Jumps in an L, like a chess knight, and captures where it lands. <b>Or</b>, instead of moving, it strikes the square directly in front of it: Black hurls a fireball, White calls lightning (1 action). A wizard either moves or strikes in a turn, never both.</p>`)+
    rbPiece('Archmage (2 wizards)',`<div>${RB.portalA}<p class="hint" style="text-align:center">An archmage acts as an Archmage's Tower. Enter, exit one square, and it pushes back.</p></div>`,`<p>Two wizards stacked. It moves and strikes like a wizard. It unstacks back into <b>two wizards</b>. It can destroy an enemy Wizard Tower or an Archmage's Tower. It may <b>flip</b> into an Archmage's Tower. It also <b>acts as an Archmage's Tower</b>: a piece may enter it and step out on one open square touching it, and the archmage pushes back toward the way in.</p>`)+
-   rbPiece("Archmage's Tower",`<div><img src="art/sprites/woodcut/w-atower.png" alt="Fulgar Archmage's Tower" style="height:140px;width:auto"><img src="art/sprites/woodcut/b-atower.png" alt="Angtapa Archmage's Tower" style="height:140px;width:auto">${RB.portalD}<p class="hint" style="text-align:center">Entered through the portal. Gold points back at the way in.</p>${RB.swap}<p class="hint" style="text-align:center">Swap with a friendly piece beside it. The arrows trade places.</p>${RB.wall}<p class="hint" style="text-align:center">Down-stack: the second tower steps beside it.</p>${RB.wallDone}<p class="hint" style="text-align:center">Two plain towers, side by side, like a wall.</p></div>`,`<p>An archmage flipped over. It is larger than a Wizard Tower, and the door is the portal. A piece enters it and steps out on one open square touching it, and the tower pushes back toward the way in. It swaps with one of your pieces on a touching square. It down-stacks into <b>two Wizard Towers</b> on squares that touch, like a short wall. Flip it back into an archmage. An enemy Stone Golem, an archmage, or Sapper's Sacrifice can destroy it.</p>`)+
+   rbPiece("Archmage's Tower",`<div><img src="${asset('art/sprites/woodcut/w-atower.png')}" alt="Fulgar Archmage's Tower" style="height:140px;width:auto"><img src="${asset('art/sprites/woodcut/b-atower.png')}" alt="Angtapa Archmage's Tower" style="height:140px;width:auto">${RB.portalD}<p class="hint" style="text-align:center">Entered through the portal. Gold points back at the way in.</p>${RB.swap}<p class="hint" style="text-align:center">Swap with a friendly piece beside it. The arrows trade places.</p>${RB.wall}<p class="hint" style="text-align:center">Down-stack: the second tower steps beside it.</p>${RB.wallDone}<p class="hint" style="text-align:center">Two plain towers, side by side, like a wall.</p></div>`,`<p>An archmage flipped over. It is larger than a Wizard Tower, and the door is the portal. A piece enters it and steps out on one open square touching it, and the tower pushes back toward the way in. It swaps with one of your pieces on a touching square. It down-stacks into <b>two Wizard Towers</b> on squares that touch, like a short wall. Flip it back into an archmage. An enemy Stone Golem, an archmage, or Sapper's Sacrifice can destroy it.</p>`)+
    `<p>Any piece may capture any enemy piece or stack, except a tower. A captured stack goes to the graveyard whole.</p>`;
   h+=ch('stack','VI','Stacking and Unstacking')+`<div class="rbp"><div>${RB.stack}</div><div><p class="dc">Move a piece onto a matching piece of your own to stack them, using its normal move. Knights stack forward, diagonally forward, or straight back. Knight + knight = cavalry, noble + noble = king, wizard + wizard = archmage. A stack holds at most 2, and a new stack is frozen this turn, except a king while an action remains.</p><p><b>Unstacking</b> (1 action) places one piece on an open square touching the stack. Both pieces stay the same kind: an archmage becomes two wizards, and an Archmage's Tower becomes two plain Wizard Towers. It cannot capture. Both pieces are frozen. You may also unstack <b>into</b> your Wizard Tower, your Archmage's Tower, or your archmage. The piece steps out on one open square touching that gate. It does not capture or stack. The gate then <b>pushes back</b> onto the stack's square, and the piece that stayed steps onto the square the gate left.</p><div class="rbp"><div>${RB.unInto}<p class="hint" style="text-align:center">Unstack into a plain tower. Gold: the tower pushes back.</p>${RB.unIntoD}<p class="hint" style="text-align:center">Unstack into an Archmage's Tower. Same step out, same push.</p></div><div><p><i>Double-tap or long-press a stack.</i></p></div></div></div></div>`;
   h+=ch('prestige','VII','Prestige: Promotion, Towers and Restore')+`<p class="dc">Each trade costs 1 action, happens on the piece's own square, and leaves the new piece frozen.</p><ul><li><b>Promotion (Cavalry → Noble)</b>: only while the cavalry stands in the <b>enemy's half</b> of the board (the four rows nearest your opponent). Prestige is earned in battle. The top knight is sacrificed to your graveyard half (it can be recruited again); the bottom knight turns over as a noble.</li><li><b>Trade limit</b>: no trade into a noble (Cavalry → Noble, Tower or Wizard → Noble, Archmage → King) may leave you with more than <b>4 nobles</b> on the board, counting a king as 2. Promotion on the back row and Royal Decree are never limited. Flips, stacking, unstacking and Noble → Tower are not affected.</li><li><b>Noble → Wizard Tower</b>: only while a tower remains in your reserve, at most two per game. You may <b>never trade your last noble</b>. Any other noble of yours, anywhere on the board, is enough. If the trade leaves that noble in danger, your next action must get it out.</li><li><b>Restore</b>: a Tower or Wizard back to a Noble, an Archmage back to a King: the towers return to your reserve and can be raised again later.</li><li><b>Flip</b> a single tower to a wizard, a wizard to a tower, an archmage to an Archmage's Tower, or that tower back to an archmage (1 action). A flipped piece cannot move, strike, swap or stack that turn.</li></ul><p>A tower, wizard or archmage that is captured or destroyed goes to the graveyard, and that tower can never be raised again.</p>`;
@@ -1586,7 +1588,7 @@ function rulebook(){
 
 /* ===================== LORE ===================== */
 function lorePage(){
-  const king=(o)=>{const src=o==='w'?'art/lore/fulgar-king.jpg':'art/lore/angtapa-king.jpg';const name=o==='w'?'King of Fulgar':'King of Angtapa';return `<div class="loreking" title="${name}"><img src="${src}" alt="${name}"></div>`;};
+  const king=(o)=>{const src=asset(o==='w'?'art/lore/fulgar-king.jpg':'art/lore/angtapa-king.jpg');const name=o==='w'?'King of Fulgar':'King of Angtapa';return `<div class="loreking" title="${name}"><img src="${src}" alt="${name}"></div>`;};
   return `<div class="rb lore"><h2 class="rbt">⚜ The Kings' Accord ⚜</h2><p class="rbs">How Strahtura <i>(strah-TOO-rah)</i> ended the Long War</p>
   <div class="lorekings">${king('w')}<span style="font-family:Cinzel;font-size:22px;color:#8a2020">⚔</span>${king('b')}</div>
   <p class="rbs" style="margin-top:0"><b>The Fulgar Empire</b> (White, the lightning) &nbsp;·&nbsp; <b>The Angtapa Empire</b> (Black, the fire)</p>

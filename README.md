@@ -10,9 +10,9 @@ Open the link. It plays in the browser, on a phone or a computer.
 
 On a phone, open the play link and choose **Add to Home Screen**. The icon is the bolt and the flame. After the first load it plays with the network off.
 
-**[Download Strahtura](https://github.com/KingofNothing07/strahtura-v102/raw/main/Strahtura-v1.02.zip)** if you want the game in a folder. Unzip it and open **Play Strahtura.html**. Leave the pictures and the music beside it.
+**Download** at the top of the menu saves **Play Strahtura.html**. That one file has the pieces, the crests, and the sound inside it. Open it. It does not need a folder beside it.
 
-The same **Download** button sits at the top of the menu inside the game.
+The same file is here: **[Play Strahtura.html](https://kingofnothing07.github.io/strahtura-v102/Play%20Strahtura.html)**.
 
 ---
 
