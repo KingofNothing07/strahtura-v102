@@ -228,27 +228,27 @@ const ART=[
  {id:'archers',name:'Hidden Archers',fig:'Line of archers on a platform',cost:'1 action (knight) · 2 (cavalry)',text:'Kill an enemy knight or cavalry standing on your half of the board.'},
  {id:'golem',name:'Stone Golem',fig:'Stone golem',cost:'2 actions',text:'One single Wizard Tower moves 1 square in any direction: onto an open square, capturing an enemy piece, or destroying an enemy tower or Archmage\'s Tower. It stays a single tower. An Archmage, and an Archmage\'s Tower, cannot be a golem.'},
  {id:'decree',name:'Royal Decree',fig:'Scroll',cost:'2 actions',text:'Promote any one of your single knights to a noble.'},
- {id:'banner',name:'Swordsmanship',fig:'A court sword',cost:'1 action',text:'One noble, or a king, captures one square diagonally forward, the way a knight kills.'},
+ {id:'banner',name:'Swordsmanship',fig:'A court sword',cost:'1 action',text:'One noble, or a king, steps one square diagonally forward onto an enemy and captures it, the way a knight kills. The noble takes that square. It cannot strike an empty square.'},
  {id:'sellswords',name:'Sellswords',fig:'Hooded knight',cost:'1 action per pair',text:'Each action recruits 2 of your fallen knights to your camp squares (2 for 1 action, 4 for 2).'},
  {id:'berserker',name:'Berserker',fig:'Crazed Viking',cost:'2 actions',text:'A single knight captures diagonally forward again and again; stop whenever you choose.'},
  {id:'keg',name:"Sapper's Sacrifice",fig:'A sapper with a powder keg',cost:'2 actions',text:'Sacrifice your knight or cavalry next to an enemy piece. That piece is killed. A Wizard Tower or an Archmage\'s Tower touching the sapper is destroyed the same way.'},
  {id:'blink',name:'Blink Rune',fig:'Glowing rune stone',cost:'1 action',text:'Your tower or Archmage swaps places with one of your pieces.'},
- {id:'flank',name:'Flank',fig:'Flag with left and right arrows',cost:'1 action per cavalry',text:'A cavalry steps one square left or right, onto the other color. It may capture the piece on that square. Usable on up to 2 cavalry in the turn you play it.'},
- {id:'shield',name:'Shield Wall',fig:'Shield',cost:'1 action',text:'One of your pieces cannot be captured until your next turn.'}
+ {id:'flank',name:'Flank',fig:'Flag with left and right arrows',cost:'1 action, once',text:'One cavalry steps one square left or right, onto the other color, and may capture the piece on that square. Once in the game.'},
+ {id:'charge',name:'Charge',fig:'A straight charge',cost:'2 actions',text:'One knight, cavalry, or noble moves farther than it normally can, up to twice as far in one straight direction, and may capture once if that direction is already how that piece captures. A noble may reach the 4th, 5th, or 6th square. Squares it could already reach stay ordinary moves. A king, a wizard, an archmage, and either tower cannot charge.'}
 ];
 const ART_HOW={
  archers:'Your half is the four rows nearest you. A single knight costs 1 action; a cavalry costs both actions. Not usable on your first turn.',
  golem:'Pick one single Wizard Tower, not an Archmage and not an Archmage\'s Tower, then the square it steps to. It can capture, or destroy an enemy tower of either kind, then stands as a single tower again. Ends your turn.',
  decree:'Pick any single knight of yours anywhere on the board; it flips to a noble. Ends your turn.',
- banner:'Pick a noble or a king that has not yet acted, then the enemy one square diagonally forward. It captures the way a knight does, and it does not step onto an empty square.',
+ banner:'Pick a noble or a king, then the enemy one square diagonally forward. The piece steps onto that square and captures. It cannot step onto an empty square.',
  sellswords:'Choose 1 or 2 actions and whether the recruits arrive as single knights or cavalry pairs. Then click the camp square for each recruit (a cavalry pair needs an empty camp square). They land at the start of your next turn and can act right away.',
  berserker:'Pick a knight and its first diagonal-forward capture. Keep clicking further captures, or press Stop. Promoting on the back row ends the rampage.',
  keg:'Pick your knight or cavalry, then any enemy piece touching it, including a Wizard Tower or an Archmage\'s Tower. Your piece is sacrificed to your own graveyard half. Ends your turn.',
  blink:'Pick your tower or Archmage, then any of your pieces. They trade places; the swapped piece counts as having acted.',
- flank:'Pick a cavalry, then the square to its left or right. An empty square puts it on the other color. An enemy on that square is captured. A second cavalry may do the same with the other action.',
- shield:'Pick one of your pieces. Nothing can capture it until the start of your next turn.'
+ flank:'Pick one cavalry, then the square to its left or right. An empty square puts it on the other color. An enemy on that square is captured. Once in the game.',
+ charge:'Pick a knight, a cavalry, or a single noble, then a square past its normal reach, up to twice as far in one straight direction. It may capture one piece if it could capture that way. A king, a wizard, an archmage, and either tower cannot charge. Ends your turn.'
 };
-const ARTK={archers:['archers'],golem:['golem'],decree:['decree'],banner:['banner'],sellswords:['sell'],berserker:['berserk'],keg:['keg'],blink:['blink'],flank:['flank'],shield:['shield']};
+const ARTK={archers:['archers'],golem:['golem'],decree:['decree'],banner:['banner'],sellswords:['sell'],berserker:['berserk'],keg:['keg'],blink:['blink'],flank:['flank'],charge:['charge']};
 const artById=id=>ART.find(a=>a.id===id);
 
 /* ===================== HELPERS ===================== */
@@ -284,7 +284,7 @@ function newState(){
   }
   return{b,nextId:id,turn:'w',actionsLeft:1,first:{w:true,b:true},used:{},frozen:{},
     camp:{w:[0,0,0,0,0,0,0,0],b:[0,0,0,0,0,0,0,0]},mode:{ai:{w:null,b:null},minutes:0},rules:{pairRecruit:false,tradeCap:4,turnLimit:0,artifacts:true,hints:true},landed:{},clock:null,campNote:{w:[0,0,0,0,0,0,0,0],b:[0,0,0,0,0,0,0,0]},grave:{w:mkG(),b:mkG()},reserve:{w:2,b:2},
-    art:{w:null,b:null},artUsed:{w:false,b:false},flankTurn:false,flankCount:0,shield:{},berserk:null,marched:{},
+    art:{w:null,b:null},artUsed:{w:false,b:false},shield:{},berserk:null,marched:{},captured:{w:0,b:0},
     phase:'setup',picker:'b',winner:null,result:'',log:[],turnNo:1};
 }
 
@@ -307,6 +307,15 @@ function pieceMoves(S,r,c,via){
   const slide=(dirs,max,o)=>{for(const[dr,dc]of dirs)for(let k=1;k<=max;k++){const rr=r+dr*k,cc=c+dc*k;if(!inB(rr,cc))break;if(!add(rr,cc,o))break;}};
   if(via==='flank'){for(const dc of[-1,1])add(r,c+dc,{empty:true,stk:false,cap:true});return out;}
   if(via==='banner'){for(const dc of[-1,1])add(r+f,c+dc,{empty:false,cap:true,stk:false});return out;}
+  if(via==='charge'){
+    if(s.t==='knight'&&s.n===1){
+      for(let k=1;k<=2;k++)if(!add(r+f*k,c,{empty:true,stk:false,cap:false}))break;
+      for(const dc of[-1,1])for(let k=1;k<=2;k++)if(!add(r+f*k,c+dc*k,{empty:false,stk:false,cap:true}))break;
+      for(let k=1;k<=2;k++)if(!add(r-f*k,c,{empty:true,stk:false,cap:false}))break;
+    }else if(s.t==='knight')slide(DIAG,6,{empty:true,cap:true,stk:false});
+    else if(s.t==='noble'&&s.n===1)slide(ORTH,6,{empty:true,cap:true,stk:false});
+    return out;
+  }
   if(s.t==='knight'&&s.n===1){
     add(r+f,c,{empty:true,stk:true,cap:false});
     if(homeRows(p).includes(r)&&inB(r+f,c)&&!S.b[r+f][c])add(r+2*f,c,{empty:true,stk:true,cap:false});
@@ -350,10 +359,11 @@ function fresh(S,s){const u=S.used[s.id];return !S.frozen[s.id]&&(!u||(!u.x&&u.m
 function bCaps(S,r,c){const s=S.b[r][c],f=fwd(s.o),o=[];for(const dc of[-1,1]){const tr=r+f,tc=c+dc;if(!inB(tr,tc))continue;const t=S.b[tr][tc];if(t&&t.o!==s.o&&t.t!=='tower'&&!S.shield[t.id])o.push([tr,tc]);}return o;}
 
 /* ===================== ACTION GENERATION ===================== */
-function expandMoves(S,A,r,c,list,k){
+function expandMoves(S,A,r,c,list,k,cost){
+  const pay=cost||1;
   for(const m of list){
-    if(m.mode==='portal'){for(const pa of portalOptions(S,r,c,m.to[0],m.to[1]))A.push({k,from:[r,c],tower:m.to,exit:pa.exit,shift:pa.shift,mode:'portal',cost:1});}
-    else A.push({k,from:[r,c],to:m.to,mode:m.mode,cost:1});
+    if(m.mode==='portal'){for(const pa of portalOptions(S,r,c,m.to[0],m.to[1]))A.push({k,from:[r,c],tower:m.to,exit:pa.exit,shift:pa.shift,mode:'portal',cost:pay});}
+    else A.push({k,from:[r,c],to:m.to,mode:m.mode,cost:pay});
   }
 }
 function gen(S){
@@ -379,7 +389,7 @@ function gen(S){
   }
   if(graveKnights(S,p)>0&&!S.recruitedTurn)for(let c=0;c<8;c++)if((S.rules&&S.rules.pairRecruit?S.camp[p][c]<2:S.camp[p][c]===0)&&!S.b[backRow(p)][c])A.push({k:'recruit',file:c,cost:1}); // proposed rule: one recruit per camp square (no cavalry pairs) except via Sellswords
   const art=S.art[p];
-  if(art&&!S.first[p]&&(!S.artUsed[p]||(art==='flank'&&S.flankTurn&&S.flankCount<2)))genArt(S,A,art,p,L);
+  if(art&&!S.first[p]&&!S.artUsed[p])genArt(S,A,art,p,L);
   return A;
 }
 function genArt(S,A,art,p,L){
@@ -393,11 +403,19 @@ function genArt(S,A,art,p,L){
   if(art==='keg'&&L>=2)for(const{r,c,s}of mine)if(s.t==='knight')for(const[a,b]of ALL8){const tr=r+a,tc=c+b;if(!inB(tr,tc))continue;const t=S.b[tr][tc];if(t&&t.o===o&&!S.shield[t.id])A.push({k:'keg',from:[r,c],to:[tr,tc],cost:2});}
   if(art==='blink')for(const x of mine)if(x.s.t==='tower'||(x.s.t==='wizard'&&x.s.n===2))for(const y of mine)if(y.s!==x.s)A.push({k:'blink',from:[x.r,x.c],to:[y.r,y.c],cost:1});
   if(art==='flank')for(const{r,c,s}of mine)if(s.t==='knight'&&s.n===2&&canMove(S,s))expandMoves(S,A,r,c,pieceMoves(S,r,c,'flank'),'flank');
-  if(art==='shield')for(const{r,c,s}of mine)if(!S.shield[s.id])A.push({k:'shield',to:[r,c],cost:1});
+  if(art==='charge'&&L>=2)for(const{r,c,s}of mine){
+    if(!canMove(S,s)||s.t==='wizard'||s.t==='tower'||(s.t==='noble'&&s.n===2))continue;
+    const have=new Set(pieceMoves(S,r,c,'normal').map(m=>m.to[0]+','+m.to[1]));
+    const extra=pieceMoves(S,r,c,'charge').filter(m=>!have.has(m.to[0]+','+m.to[1]));
+    expandMoves(S,A,r,c,extra,'charge',2);
+  }
 }
 
+function pts(s){if(!s)return 0;if(s.t==='knight')return s.n===2?3:1;if(s.t==='noble')return s.n===2?10:5;if(s.t==='wizard'||s.t==='tower')return s.n===2?9:7;return 0;}
+function scoreOf(S,p){let n=S.captured&&S.captured[p]||0;for(const x of stacks(S,p))n+=pts(x.s);return n;}
+function settlePoints(S,why){const w=scoreOf(S,'w'),b=scoreOf(S,'b');S.winner=w>b?'w':b>w?'b':'draw';S.result=`${why} — points: White ${w}, Black ${b}. `+(S.winner==='draw'?'Draw.':`${NAME[S.winner]} wins on points.`);}
 /* ===================== APPLY ===================== */
-function capture(S,p,x){const t=S.b[x[0]][x[1]];S.grave[p][t.o][t.t]+=t.n;delete S.shield[t.id];S.b[x[0]][x[1]]=null;return t;}
+function capture(S,p,x){const t=S.b[x[0]][x[1]];S.grave[p][t.o][t.t]+=t.n;if(!S.captured)S.captured={w:0,b:0};S.captured[p]+=pts(t);delete S.shield[t.id];S.b[x[0]][x[1]]=null;return t;}
 function promote(S){
   const msgs=[];
   for(const p of['w','b']){const r=backRow(opp(p));for(let c=0;c<8;c++){const s=S.b[r][c];if(s&&s.o===p&&s.t==='knight'&&s.n===1){s.t='noble';msgs.push(`${NAME[p]} knight on ${sq(r,c)} promotes to Noble`);}}}
@@ -420,14 +438,13 @@ function apply(S,a){
   const set=(x,v)=>{B[x[0]][x[1]]=v;};
   const march=s=>{if(s&&s.t==='knight'&&s.n===1){(S.marched||(S.marched={}))[s.id]=1;}};
   switch(a.k){
-  case'move':case'banner':case'flank':{
-    const s=at(a.from),pre=a.k==='banner'?'[Swordsmanship] ':a.k==='flank'?'[Flank] ':'',nm=pname(s);
+  case'move':case'banner':case'flank':case'charge':{
+    const s=at(a.from),pre=a.k==='banner'?'[Swordsmanship] ':a.k==='flank'?'[Flank] ':a.k==='charge'?'[Charge] ':'',nm=pname(s);
     if(a.mode==='portal'){const tw=at(a.tower);set(a.from,null);set(a.tower,null);set(a.exit,s);set(a.shift,tw);use(s,'m');march(s);
       t=`${pre}Tower Shift: ${nm} ${sq(...a.from)} passes through ${pname(tw)} ${sq(...a.tower)} to ${sq(...a.exit)}; ${pname(tw)} shifts to ${sq(...a.shift)}`;}
     else if(a.mode==='stack'){const ns={id:S.nextId++,o:p,t:s.t,n:2};set(a.from,null);set(a.to,ns);S.frozen[ns.id]=1;t=`${pre}${nm} ${sq(...a.from)} stacks onto ${sq(...a.to)} → ${pname(ns)}`;}
     else{let cap='';if(at(a.to)){const v=capture(S,p,a.to);cap=a.mode==='destroy'?' — destroys enemy Tower':` — captures ${pname(v)}`;}set(a.from,null);set(a.to,s);use(s,'m');march(s);t=`${pre}${nm} ${sq(...a.from)}→${sq(...a.to)}${cap}`;}
     if(a.k!=='move')S.artUsed[p]=true;
-    if(a.k==='flank'){S.flankTurn=true;S.flankCount++;}
     break;}
   case'ranged':{const s=at(a.from),v=capture(S,p,a.to);use(s,'x');t=`${pname(s)} ${sq(...a.from)} ${p==='b'?'hurls a fireball':'calls lightning'} at ${sq(...a.to)} — ${v.t==='tower'?'destroys enemy Tower':'captures '+pname(v)}`;break;}
   case'unstack':{const s=at(a.from),nm=pname(s);const bot={id:S.nextId++,o:p,t:s.t,n:1},top={id:S.nextId++,o:p,t:s.t,n:1};
@@ -452,7 +469,6 @@ function apply(S,a){
   case'bstop':S.berserk=null;t='[Berserker] stops';break;
   case'keg':{const s=at(a.from),v=at(a.to);const what=v.t==='tower'?(v.n===2?"destroys the enemy Archmage's Tower":'destroys the enemy Tower'):`kills ${pname(v)}`;S.grave[p][p].knight+=s.n;set(a.from,null);capture(S,p,a.to);S.artUsed[p]=true;t=`[Sapper's Sacrifice] ${pname(s)} ${sq(...a.from)} is sacrificed — ${what} on ${sq(...a.to)}`;break;}
   case'blink':{const x=at(a.from),y=at(a.to);set(a.from,y);set(a.to,x);use(y,'x');S.artUsed[p]=true;t=`[Blink Rune] ${pname(x)} ${sq(...a.from)} swaps with ${pname(y)} ${sq(...a.to)}`;break;}
-  case'shield':{const s=at(a.to);S.shield[s.id]=p;S.artUsed[p]=true;t=`[Shield Wall] ${pname(s)} ${sq(...a.to)} shielded until ${NAME[p]}'s next turn`;break;}
   }
   S.actionsLeft-=a.cost;
   if(S.actionsLeft>0){for(let r=0;r<8;r++)for(let c=0;c<8;c++){const ks=S.b[r][c];if(ks&&ks.o===p&&ks.t==='noble'&&ks.n===2)delete S.frozen[ks.id];}}
@@ -480,7 +496,7 @@ function legalActions(S){
 
 /* ===================== TURN FLOW ===================== */
 function startTurn(S){
-  const p=S.turn;S.used={};S.frozen={};S.landed={};S.recruitedTurn=0;S.arrivals=[];S.flankTurn=false;S.flankCount=0;S.berserk=null;
+  const p=S.turn;S.used={};S.frozen={};S.landed={};S.recruitedTurn=0;S.arrivals=[];S.berserk=null;
   for(const id in S.shield)if(S.shield[id]===p)delete S.shield[id];
   S.actionsLeft=S.first[p]?1:2;
   S.phase='play';
@@ -504,7 +520,7 @@ function placeCamp(S,i,c){
 }
 function posKey(S){return S.b.map(r=>r.map(x=>x?x.o+x.t[0]+x.n:'.').join('')).join('/')+S.turn;}
 function endTurn(S){S.recent=(S.recent||[]).concat(posKey(S)).slice(-16);S.first[S.turn]=false;S.turn=opp(S.turn);S.turnNo++;
-  if(S.rules&&S.rules.turnLimit&&S.turnNo>S.rules.turnLimit&&!S.winner){const nw=nobleUnits(S,'w'),nb=nobleUnits(S,'b');S.winner=nw>nb?'w':nb>nw?'b':'draw';S.result=`Turn limit (${S.rules.turnLimit}) reached — nobles left: White ${nw}, Black ${nb}. `+(S.winner==='draw'?'Draw.':`${NAME[S.winner]} wins with more nobles.`);return;}
+  if(S.rules&&S.rules.turnLimit&&S.turnNo>S.rules.turnLimit&&!S.winner){settlePoints(S,`Turn limit (${S.rules.turnLimit})`);return;}
   startTurn(S);}
 
 /* ===================== PIECE ART ===================== */
@@ -520,15 +536,15 @@ function pieceSVG(s,cls='pc'){
 }
 
 /* ===================== COMPUTER OPPONENT ===================== */
-const VAL={knight:[1,3],noble:[5,7],wizard:[5,6],tower:[5,5]}; // the computer's private piece weights for judging positions (not a player-facing points system)
+const VAL={knight:[1,3],noble:[5,10],wizard:[7,9],tower:[7,9]};
 const val=s=>VAL[s.t][s.n-1];
 const ART_KEEP={easy:0.15,medium:0.8,hard:2.1}; // value of still holding the artifact: higher = waits for a stronger moment
-const ART_ACT=new Set(['archers','golem','decree','banner','sell','berserk','keg','blink','flank','shield']);
+const ART_ACT=new Set(['archers','golem','decree','banner','sell','berserk','keg','blink','flank','charge']);
 const ART_W={
-  medium:{archers:4,berserker:4,banner:4,flank:3,decree:3,keg:3,golem:2,shield:2,sellswords:2,blink:1},
-  hard:{decree:5,banner:5,keg:4,golem:4,blink:4,flank:3,berserker:3,archers:3,shield:4,sellswords:3}
+  medium:{archers:4,berserker:4,banner:4,charge:4,flank:3,decree:3,keg:3,golem:2,sellswords:2,blink:1},
+  hard:{decree:5,banner:5,charge:4,keg:4,golem:4,blink:4,flank:3,berserker:3,archers:3,sellswords:3}
 };
-const ART_ANSWER={archers:'shield',berserker:'shield',banner:'shield',decree:'berserker',golem:'keg',keg:'blink',blink:'shield',sellswords:'archers',flank:'shield',shield:'decree'};
+const ART_ANSWER={berserker:'charge',banner:'charge',decree:'berserker',golem:'keg',keg:'blink',blink:'charge',sellswords:'archers',flank:'archers',charge:'blink'};
 const CAPK=['ranged','archers','golem','berserk','bstep','keg'];
 function cover(S,r,c){ // squares this piece could capture on if an enemy stood there
   const s=S.b[r][c],p=s.o,f=fwd(p),o=[];
@@ -569,11 +585,7 @@ function evalS(S,me,level='hard'){
       const en=nobleStacks(S,o);
       const close=en.length===1&&nobleUnits(S,p)>nobleUnits(S,o)?(level==='hard'?0.28:0.16):0.07;
       if(en.length)for(const{r,c,s}of mine){if(s.t==='tower')continue;const d=Math.min(...en.map(n=>Math.max(Math.abs(n.r-r),Math.abs(n.c-c))));sc+=sg*close*(7-d);}
-      // noble safety and pressure: the real objective
       const ns=nobleStacks(S,p),single=ns.length===1;
-      const towers=mine.filter(x=>x.s.t==='tower').length;
-      if(towers&&ns.length>=2)sc+=sg*(level==='hard'?2.4:1.1)*Math.min(towers,2);
-      else if(towers&&ns.length===1)sc+=sg*(level==='hard'?0.35:0.1);
       for(const n of ns){
         const k=n.r*8+n.c;let near=0,guards=0;
         for(const x of theirs)if(Math.max(Math.abs(x.r-n.r),Math.abs(x.c-n.c))<=2)near++;
@@ -635,7 +647,9 @@ function artUseBias(S,a,level){
   if(a.k==='flank')return level==='hard'?0.2:0.1;
   if(a.k==='sell')return level==='medium'?0.45:0.15;
   if(a.k==='banner'&&a.mode==='capture')return level==='hard'?0.7:0.75;
-  if(level==='medium'&&(a.k==='blink'||a.k==='shield'))return -0.3;
+  if(a.k==='charge'&&a.mode==='capture')return level==='hard'?0.55:0.85;
+  if(a.k==='charge')return 0.1;
+  if(level==='medium'&&a.k==='blink')return -0.3;
   return 0;
 }
 function botChoose(S,level){
@@ -792,9 +806,9 @@ function glow(x,col){const el=pieceEl(x);if(!el)return;el.animate([{filter:`drop
 function animSpec(S,a){
   const at=x=>x&&S.b[x[0]]&&S.b[x[0]][x[1]]?Object.assign({},S.b[x[0]][x[1]]):null,p=S.turn;
   switch(a.k){
-    case'move':case'banner':case'flank':case'bstep':case'berserk':case'front':
+    case'move':case'banner':case'flank':case'charge':case'bstep':case'berserk':case'front':
       if(a.mode==='portal'){const g=at(a.tower);return{t:'portal',from:a.from,tower:a.tower,exit:a.exit,shift:a.shift,mover:at(a.from),gate:g&&g.t==='wizard'?'wizard':'tower',gateSide:g?g.o:p,last:[a.from,a.exit]};}
-      return{t:'move',from:a.from,to:a.to,victim:(a.mode==='capture'||a.mode==='destroy'||a.k==='bstep'||a.k==='berserk')?at(a.to):null,stack:a.mode==='stack',mover:at(a.from),art:a.k==='banner'||a.k==='flank'||a.k==='berserk',last:[a.from,a.to]};
+      return{t:'move',from:a.from,to:a.to,victim:(a.mode==='capture'||a.mode==='destroy'||a.k==='bstep'||a.k==='berserk')?at(a.to):null,stack:a.mode==='stack',mover:at(a.from),art:a.k==='banner'||a.k==='flank'||a.k==='charge'||a.k==='berserk',last:[a.from,a.to]};
     case'ranged':return{t:'shot',from:a.from,to:a.to,victim:at(a.to),fire:p==='b',rank:(at(a.from)||{}).n||1,last:[a.from,a.to]};
     case'archers':return{t:'arrow',to:a.to,victim:at(a.to),side:p,last:[a.to]};
     case'golem':return{t:'move',from:a.from,to:a.to,victim:at(a.to),art:true,last:[a.from,a.to]};
@@ -1012,7 +1026,7 @@ function fillActbar(){
 }
 function actPath(a){
   switch(a.k){
-    case'move':case'banner':case'flank':return a.mode==='portal'?[a.from,a.tower,a.exit]:[a.from,a.to];
+    case'move':case'banner':case'flank':case'charge':return a.mode==='portal'?[a.from,a.tower,a.exit]:[a.from,a.to];
     case'ranged':case'unstack':case'golem':case'keg':case'blink':case'berserk':case'front':case'relay':return a.k==='unstack'&&a.mode==='portal'?[a.from,a.tower,a.exit]:[a.from,a.to];
     case'archers':case'decree':case'shield':case'bstep':return[a.to];
   }
@@ -1097,7 +1111,7 @@ const FIG={
  keg:`<circle cx="50" cy="56" r="28" fill="#2a2420" stroke="#000" stroke-width="3"/><rect x="26" y="80" width="48" height="8" fill="#2a2420"/><rect x="44" y="22" width="12" height="10" fill="#5a5048"/><path d="M50 22 Q58 10 66 14" stroke="#c9a227" stroke-width="3" fill="none"/><path d="M66 8 l3 6 6 -2 -3 6 5 4 -7 0 -1 6 -3 -6 -6 2 4 -5 -4 -5 6 1z" fill="#ff9a20"/><circle cx="40" cy="48" r="6" fill="#ffffff33"/>`,
  blink:`<circle cx="50" cy="52" r="40" fill="#7b3cc022"/><path d="M30 86 L26 40 Q30 18 50 16 Q70 18 74 40 L70 86 Z" fill="#8f8a80" stroke="#3b3a36" stroke-width="3"/><path d="M50 30 V70 M38 42 L62 58 M62 42 L38 58" stroke="#b67cff" stroke-width="4"/>`,
  flank:`<line x1="50" y1="8" x2="50" y2="94" stroke="#5a3a1a" stroke-width="5"/><rect x="18" y="14" width="64" height="34" fill="#2a5fbf" stroke="#1c130b" stroke-width="3"/><path d="M24 31 L36 22 V27 H46 V35 H36 V40 Z M76 31 L64 22 V27 H54 V35 H64 V40 Z" fill="#f6ecd4"/>`,
- shield:`<path d="M50 10 L82 20 V48 Q82 76 50 92 Q18 76 18 48 V20 Z" fill="#2a5fbf" stroke="#1c130b" stroke-width="3"/><path d="M50 18 V84 M24 44 H76" stroke="#e7c766" stroke-width="7"/>`
+ charge:`<path d="M18 78 L50 14 L82 78" fill="none" stroke="#8a2020" stroke-width="6"/><path d="M50 14 L40 36 H60 Z" fill="#8a2020"/><path d="M28 86 H72" stroke="#3b2a17" stroke-width="4"/>`,
 };
 function artArt(id,big){
   const W={o:'w',t:'knight',n:1},B={o:'b',t:'knight',n:1},x0=120,y0=8,cl=37;
@@ -1116,7 +1130,7 @@ function artArt(id,big){
    case'keg':d=P(W,2,1)+P(B,2,2)+`<circle cx="${(cx(1)+cx(2))/2}" cy="${cy(2)}" r="26" fill="#ff9a2066" stroke="#ff6a00" stroke-width="3"/>`+X(2,1)+X(2,2);break;
    case'blink':d=P({o:'w',t:'tower',n:1},0,0)+P(W,3,3)+`<path d="M${cx(0)+10} ${cy(0)+10} Q${cx(3)} ${cy(0)} ${cx(3)-6} ${cy(3)-14}" stroke="#7b3cc0" stroke-width="4" fill="none" marker-end="url(#ah-${id}-7b3cc0)"/><path d="M${cx(3)-12} ${cy(3)-8} Q${cx(0)} ${cy(3)} ${cx(0)+4} ${cy(0)+16}" stroke="#7b3cc0" stroke-width="4" fill="none" marker-end="url(#ah-${id}-7b3cc0)"/>`;break;
    case'flank':d=P({o:'w',t:'knight',n:2},2,1)+P(B,2,2)+ar(2,1,2,0)+ar(2,1,2,2,'#c0262b')+X(2,2);break;
-   case'shield':d=P({o:'w',t:'noble',n:1},2,1)+`<text x="${cx(1)+6}" y="${cy(2)-4}" font-size="18">🛡</text>`+P({o:'b',t:'noble',n:1},0,1)+`<line x1="${cx(1)}" y1="${cy(0)+14}" x2="${cx(1)}" y2="${cy(2)-24}" stroke="#c0262b" stroke-width="4"/><path d="M${cx(1)-14} ${cy(1)+2} H${cx(1)+14}" stroke="#2a5fbf" stroke-width="6"/>`;break;
+   case'charge':d=P({o:'w',t:'noble',n:1},3,1)+P(B,0,1)+ar(3,1,0,1,'#c0262b')+X(0,1);break;
   }
   const defs=['2f7a2f','c0262b','7b3cc0'].map(c=>`<marker id="ah-${id}-${c}" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M0 0 L10 5 L0 10 Z" fill="#${c}"/></marker>`).join('');
   return `<svg viewBox="0 0 280 164" style="width:100%;max-width:${big?520:300}px;display:block;margin:4px auto" aria-hidden="true"><defs>${defs}</defs><rect x="2" y="8" width="108" height="148" rx="10" fill="#fbf2dc" stroke="#b8892b" stroke-width="2"/><image href="art/plaques/${id}.png" x="8" y="20" width="96" height="128" preserveAspectRatio="xMidYMid meet"/>${g}${d}<rect x="${x0}" y="${y0}" width="${cl*4}" height="${cl*4}" fill="none" stroke="#3b2918" stroke-width="2"/></svg>`;
@@ -1274,6 +1288,7 @@ function renderStatus(){
   if(S.winner){h=`<div class="who">${S.winner==='draw'?'Draw':NAME[S.winner]+' wins'}</div><div>${S.result}</div>`;$('status').innerHTML=h;return;}
   if(S.phase==='pick'){$('status').innerHTML=`<div class="who">Choosing artifacts</div><div>${NAME[S.picker]} picks ${S.picker==='b'?'first':'second'}.</div>`;return;}
   if(S.clock)h+=clockHTML();
+  if(S.clock||(S.rules&&S.rules.turnLimit))h+=`<div class="flags"><span>Points ${scoreOf(S,'w')}–${scoreOf(S,'b')}</span></div>`;
   h+=`<div><span class="who">${EMPS[p]} (${NAME[p]})${isAI(p)?' (computer, '+S.mode.ai[p]+')':''}</span> to act · Turn ${S.turnNo}${S.rules&&S.rules.turnLimit?' of '+S.rules.turnLimit:''} · <b>${S.actionsLeft}</b> action${S.actionsLeft===1?'':'s'} left</div><div class="flags">`;
   if(S.first[p])h+='<span>First turn: 1 action, no stacking, no artifacts</span>';
   if(checkApplies(S,p))h+=inDanger(S,p)?'<span class="bad">CHECK — your last noble is in danger. You may recruit or use your artifact, and an action this turn must end it</span>':'<span>Last noble piece: may not move into danger. You may still recruit or use your artifact</span>';
@@ -1319,7 +1334,7 @@ function sellPreview(gk,a){const u=sellUnits(S,a),cav=u.filter(x=>x===2).length,
   const parts=[];if(cav)parts.push(`${cav} cavalry`);if(kn)parts.push(`${kn} knight${kn>1?'s':''}`);return parts.join(' + ')+(got<a.acts*2?` (limited by ${got<gk?'open back-row squares':'fallen knights'})`:'');}
 function artCard(p){
   const id=S.art[p];if(!id)return `<div class="card"><span class="fg">${S.rules&&S.rules.artifacts===false?'Artifacts are off this game':'No artifact chosen yet'}</span></div>`;
-  const a=artById(id),used=S.artUsed[p]&&!(id==='flank'&&S.flankTurn&&S.turn===p);
+  const a=artById(id),used=S.artUsed[p];
   const avail=S.turn===p&&!isAI(p)&&LEG.some(x=>ARTK[id].includes(x.k));
   let btn='';
   if(avail&&!S.berserk){
@@ -1327,8 +1342,8 @@ function artCard(p){
     else if(id==='sellswords'){const gk=graveKnights(S,p);btn=`<p class="hint">${gk} fallen knight${gk===1?'':'s'} in your graveyard.</p><div class="btns">`+LEG.filter(x=>x.k==='sell').map(x=>`<button data-sell="${LEG.indexOf(x)}">${x.acts} action${x.acts>1?'s':''}: ${sellPreview(gk,x)}</button>`).join('')+'</div>';}
     else btn=`<button class="primary" data-art="${id}">${ui.kinds&&ui.kinds.includes(ARTK[id][0])?'Choosing… (click to cancel)':'Use '+a.name}</button>`;
   }
-  const state=S.artUsed[p]&&!(id==='flank'&&S.flankTurn)?'Used — back in the treasure box':S.first[p]?'Not usable on your first turn':'Ready';
-  return `<div class="card ${S.artUsed[p]&&!(id==='flank'&&S.flankTurn)?'used':''}"><div class="nm" style="display:flex;justify-content:space-between;align-items:center">${a.name}<button data-info="${id}" style="font-size:13px;padding:1px 8px">ⓘ Card</button></div><img class="plaque" src="art/plaques/${id}.png" alt=""><div class="cs">${a.cost}</div><div class="tx">${a.text}</div><div class="hint">${state}</div>${btn}</div>`;
+  const state=S.artUsed[p]?'Used — back in the treasure box':S.first[p]?'Not usable on your first turn':'Ready';
+  return `<div class="card ${S.artUsed[p]?'used':''}"><div class="nm" style="display:flex;justify-content:space-between;align-items:center">${a.name}<button data-info="${id}" style="font-size:13px;padding:1px 8px">ⓘ Card</button></div><img class="plaque" src="art/plaques/${id}.png" alt=""><div class="cs">${a.cost}</div><div class="tx">${a.text}</div><div class="hint">${state}</div>${btn}</div>`;
 }
 function renderRight(){
   const p=S.turn;let hArts='',h='';
@@ -1387,11 +1402,11 @@ function renderSetup(m){
   m.innerHTML=`<div class="modal"><div class="box" style="max-width:600px">${menuTitle()}
   <h3>Players</h3><div class="btns">${opt('bot','none','Two players, one screen')}${opt('bot','b','Me (White) vs computer')}${opt('bot','w','Me (Black) vs computer')}${opt('bot','both','Watch: computer vs computer')}</div>
   ${diff}${setup.bot==='b'||setup.bot==='w'?'<p class="hint">Easy plays loose and spends its artifact early. Medium takes a direct artifact and uses it to capture. Hard picks a plan, answers yours when it chooses second, and holds the artifact for a better moment.</p>':''}
-  <h3>Tournament rule: turn limit (100 turns)</h3><div class="btns">${opt('limit','on','On')}${opt('limit','off','Off')}</div><p class="hint">If no one has won after 100 turns (50 each), the side with more nobles on the board wins (a king counts as 2). Equal nobles is a draw.</p>
+  <h3>Tournament rule: turn limit (100 turns)</h3><div class="btns">${opt('limit','on','On')}${opt('limit','off','Off')}</div><p class="hint">If no one has won after 100 turns, the side with more points wins. Points are the pieces still on the board plus the pieces you have captured. A tie is a draw.</p>
   <h3>Artifacts</h3><div class="btns">${opt('arts','on','On')}${opt('arts','off','Off (no artifacts this game)')}</div>
   <h3>Move hints</h3><div class="btns">${opt('hints','on','Tutorial (show move dots)')}${opt('hints','off','Fog of war (hide hints)')}</div><p class="hint">Fog of war hides move dots and playable-piece outlines. The red danger pulse on a last noble, the last-move highlight and your selected piece still show. You can switch this during play in ⚙ Settings.</p>
-  <h3>Time control</h3><div class="btns">${opt('minutes',0,'Untimed')}${opt('minutes',10,'10 min game')}${opt('minutes',20,'20 min game')}${opt('minutes',30,'30 min game')}</div>
-  <p class="hint">The time is split evenly: each player's clock gets half and runs only during that player's turns. A player whose clock reaches zero loses.</p>
+  <h3>Time control</h3><div class="btns">${opt('minutes',0,'Untimed')}${opt('minutes',5,'5 min game')}${opt('minutes',10,'10 min game')}${opt('minutes',20,'20 min game')}${opt('minutes',30,'30 min game')}</div>
+  <p class="hint">The time is split evenly. Each clock runs only on that player's turn. When a clock reaches zero, the side with more points wins. A tie is a draw.</p>
   <div class="btns" style="margin-top:12px"><button class="primary" id="mStart">${setup.arts==='on'?'Start — choose artifacts':'Start game'}</button><button id="mRules">Read the rulebook</button><button id="mLore">Read the lore</button><button id="mCredits">Credits</button><button id="mStyle">⚙ Settings</button></div></div></div>`;
   m.querySelectorAll('[data-set]').forEach(b=>b.onclick=()=>{const k=b.dataset.set;setup[k]=k==='minutes'?+b.dataset.v:b.dataset.v;render();});
   $('mStart').onclick=()=>{
@@ -1553,7 +1568,7 @@ function rulebook(){
   const ch=(id,n,t)=>`<h3 id="rb-${id}"><span class="orn">❦</span> ${n}. ${t}</h3>`;
   const toc=[['play','The Game'],['board','The Board'],['setup','Setup'],['turns','Turns and Actions'],['pieces','The Pieces'],['stack','Stacking and Unstacking'],['prestige','Prestige: Promotion, Towers and Restore'],['portal','Tower Shift'],['recruit','Recruiting and the Camp'],['check','Check and Desperate Measures'],['win','Winning and Drawing'],['art','The Artifacts'],['ref','Quick Reference']];
   let h=`<div class="rb"><h2 class="rbt">⚜ The Book of Strahtura ⚜</h2><p class="rbs">Strahtura <i>(strah-TOO-rah)</i> · Rules for Play Strahtura v1.02</p>
-  <p class="dc"><b>New in v1.02.</b> A knight may retreat one square straight back, without capturing, onto an empty square, onto your own knight, or into your own tower or archmage. Front Line lets that knight jump the single knight directly ahead. An archmage may flip into an Archmage's Tower (double tower in the board game), which swaps with a friendly piece beside it and cannot be promoted. Stone Golem moves only a single Wizard Tower. Settings opened during a match close with the ✕ at the top right.</p>
+  <p class="dc"><b>New in v1.02.</b> A knight may retreat one square straight back, without capturing, onto an empty square, onto your own knight, or into your own tower or archmage. Front Line lets that knight jump the single knight directly ahead. An archmage may flip into an Archmage's Tower (double tower in the board game), which swaps with a friendly piece beside it and cannot be promoted. Stone Golem moves only a single Wizard Tower. Shield Wall is gone: Charge lets a knight, a cavalry, or a noble reach up to twice as far in one direction, costing both actions and capturing at most once. Flank is one action, once in the game. Swordsmanship steps the noble onto the square it takes. A game may be timed at 5, 10, 20, or 30 minutes, split evenly; when a clock or the 100-turn limit runs out, points decide. Settings opened during a match close with the ✕ at the top right.</p>
   <nav class="rbtoc">${toc.map(([id,t],i)=>`<a data-rb="${id}">${['I','II','III','IV','V','VI','VII','VIII','IX','X','XI','XII','XIII'][i]}. ${t}</a>`).join('')}</nav>`;
   h+=ch('play','I','The Game')+`<p class="dc">Two empires meet on an eight-by-eight field. Each begins with fourteen knights and two nobles. Every piece is the same carved helm: stand it one way and it is a knight; turn it over and it is a crowned noble. Through stacking, flipping and trading, an empire gives up numbers to raise mightier pieces. This is <b>prestige</b>: fewer pieces, greater power.</p><p>You win by capturing <b>every enemy noble</b>. A king is two nobles, so both must fall.</p>`;
   h+=ch('board','II','The Board')+`<p class="dc">Play on a standard 8×8 board. Off the board each side keeps:</p><ul><li><b>A camp</b>: eight dotted squares behind your back row, one behind each file, where recruits wait.</li><li><b>A half of the graveyard</b>: one large rectangle split in two. Pieces you capture go in <i>your</i> half; pieces you sacrifice go in your own half too.</li><li><b>An artifact square</b> with its card behind it, and behind that <b>two tower squares</b> showing how many Wizard Towers you can still raise.</li></ul>`;
@@ -1567,14 +1582,14 @@ function rulebook(){
    rbPiece('Wizard Tower',`<div>${RB.portal}<p class="hint" style="text-align:center">Green stops just inside the tower. Purple starts just inside and leaves. Gold, dotted, points back at the way in.</p></div>`,`<p>Raised by trading a noble (VII). This is the plain tower. It never moves on its own and <b>cannot be captured</b>, except by an archmage or an artifact. Stone Golem can move only this single tower. An enemy Stone Golem can also destroy it.</p><p>A piece steps onto it, then out to <b>one open square touching the tower</b>. The green arrow only just enters the tower square. The purple arrow starts the same small way inside, and the purple dots are every square it may leave by. The dotted gold arrow points back toward the entry: that is the tower pushing one square that way. A piece coming from farther away, or a wizard jumping in by an L, uses the same three arrows. It does not keep moving, capture, or stack. If the square the tower would push onto is occupied or off the board, the piece cannot enter from that side.</p>`)+
    rbPiece('Wizard',RB.wizard,`<p>Jumps in an L, like a chess knight, and captures where it lands. <b>Or</b>, instead of moving, it strikes the square directly in front of it: Black hurls a fireball, White calls lightning (1 action). A wizard either moves or strikes in a turn, never both.</p>`)+
    rbPiece('Archmage (2 wizards)',`<div>${RB.portalA}<p class="hint" style="text-align:center">An archmage acts as an Archmage's Tower. Enter, exit one square, and it pushes back.</p></div>`,`<p>Two wizards stacked. It moves and strikes like a wizard. It unstacks back into <b>two wizards</b>. It can destroy an enemy Wizard Tower or an Archmage's Tower. It may <b>flip</b> into an Archmage's Tower. It also <b>acts as an Archmage's Tower</b>: a piece may enter it and step out on one open square touching it, and the archmage pushes back toward the way in. It does not place a wizard down as a tower.</p>`)+
-   rbPiece("Archmage's Tower",`<div><img src="art/sprites/woodcut/w-atower.png" alt="Fulgar Archmage's Tower" style="height:140px;width:auto"><img src="art/sprites/woodcut/b-atower.png" alt="Angtapa Archmage's Tower" style="height:140px;width:auto">${RB.portalD}<p class="hint" style="text-align:center">Entered like a plain tower. Gold points back at the way in.</p>${RB.swap}<p class="hint" style="text-align:center">Swap with a friendly piece beside it. The arrows trade places.</p>${RB.wall}<p class="hint" style="text-align:center">Down-stack: the second tower steps beside it.</p>${RB.wallDone}<p class="hint" style="text-align:center">Two plain towers, side by side, like a wall.</p></div>`,`<p>An archmage flipped over. It is larger than a Wizard Tower, and the door is the portal. It is used <b>like a plain tower</b>. It can swap with one of your pieces on a touching square. It down-stacks into <b>two plain Wizard Towers</b> on squares that touch, like a short wall. It cannot capture, and it cannot be promoted. Stone Golem cannot move it, but an <b>enemy Stone Golem can destroy it</b>, the same as a plain tower. An archmage or the Powder Keg can destroy it too.</p>`)+
+   rbPiece("Archmage's Tower",`<div><img src="art/sprites/woodcut/w-atower.png" alt="Fulgar Archmage's Tower" style="height:140px;width:auto"><img src="art/sprites/woodcut/b-atower.png" alt="Angtapa Archmage's Tower" style="height:140px;width:auto">${RB.portalD}<p class="hint" style="text-align:center">Entered like a plain tower. Gold points back at the way in.</p>${RB.swap}<p class="hint" style="text-align:center">Swap with a friendly piece beside it. The arrows trade places.</p>${RB.wall}<p class="hint" style="text-align:center">Down-stack: the second tower steps beside it.</p>${RB.wallDone}<p class="hint" style="text-align:center">Two plain towers, side by side, like a wall.</p></div>`,`<p>An archmage flipped over. It is larger than a Wizard Tower, and the door is the portal. It is used <b>like a plain tower</b>. It can swap with one of your pieces on a touching square. It down-stacks into <b>two plain Wizard Towers</b> on squares that touch, like a short wall. It cannot capture, and it cannot be promoted. Stone Golem cannot move it, but an <b>enemy Stone Golem can destroy it</b>, the same as a plain tower. An archmage or Sapper's Sacrifice can destroy it too.</p>`)+
    `<p>Any piece may capture any enemy piece or stack, except a tower. A captured stack goes to the graveyard whole.</p>`;
   h+=ch('stack','VI','Stacking and Unstacking')+`<div class="rbp"><div>${RB.stack}</div><div><p class="dc">Move a piece onto a matching piece of your own to stack them, using its normal move. Knights stack forward, diagonally forward, or straight back. Knight + knight = cavalry, noble + noble = king, wizard + wizard = archmage. A stack holds at most 2, and a new stack is frozen this turn, except a king while an action remains.</p><p><b>Unstacking</b> (1 action) places one piece on an open square touching the stack. Both pieces stay the same kind: an archmage becomes two wizards, and an Archmage's Tower becomes two plain Wizard Towers. It cannot capture. Both pieces are frozen. You may also unstack <b>into</b> your Wizard Tower, your Archmage's Tower, or your archmage. The piece steps out on one open square touching that gate. It does not capture or stack. The gate then <b>pushes back</b> onto the stack's square, and the piece that stayed steps onto the square the gate left.</p><div class="rbp"><div>${RB.unInto}<p class="hint" style="text-align:center">Unstack into a plain tower. Gold: the tower pushes back.</p>${RB.unIntoD}<p class="hint" style="text-align:center">Unstack into an Archmage's Tower. Same step out, same push.</p></div><div><p><i>Double-tap or long-press a stack.</i></p></div></div></div></div>`;
   h+=ch('prestige','VII','Prestige: Promotion, Towers and Restore')+`<p class="dc">Each trade costs 1 action, happens on the piece's own square, and leaves the new piece frozen.</p><ul><li><b>Promotion (Cavalry → Noble)</b>: only while the cavalry stands in the <b>enemy's half</b> of the board (the four rows nearest your opponent). Prestige is earned in battle. The top knight is sacrificed to your graveyard half (it can be recruited again); the bottom knight turns over as a noble.</li><li><b>Trade limit</b>: no trade into a noble (Cavalry → Noble, Tower or Wizard → Noble, Archmage → King) may leave you with more than <b>4 nobles</b> on the board, counting a king as 2. Promotion on the back row and Royal Decree are never limited. Flips, stacking, unstacking and Noble → Tower are not affected.</li><li><b>Noble → Wizard Tower</b>: only while a tower remains in your reserve, at most two per game. You may <b>never trade your last noble</b>. Any other noble of yours, anywhere on the board, is enough. If the trade leaves that noble in danger, your next action must get it out.</li><li><b>Restore</b>: a Tower or Wizard back to a Noble, an Archmage back to a King: the towers return to your reserve and can be raised again later.</li><li><b>Flip</b> a single tower to a wizard, a wizard to a tower, an archmage to an Archmage's Tower, or that tower back to an archmage (1 action). A flipped piece cannot move, strike, swap or stack that turn. An Archmage's Tower cannot be restored into a king.</li></ul><p>A tower, wizard or archmage that is captured or destroyed goes to the graveyard, and that tower can never be raised again.</p>`;
   h+=ch('portal','VIII','Tower Shift')+`<p class="dc">A plain Wizard Tower, an Archmage's Tower, and an archmage all work the same way. The green arrow stops a little inside the gate. The purple arrow starts that same small way inside and leaves. Purple dots mark every open square it may leave by. The dotted gold arrow points back toward the entry: the gate pushes one square that way. It is the same if the piece came from farther off, or jumped in by a wizard's L. The step out is still one open square, and it cannot capture or stack.</p><div class="rbp"><div>${RB.portal}<p class="hint" style="text-align:center">Plain tower, from beside it</p></div><div>${RB.portalD}<p class="hint" style="text-align:center">Archmage's Tower, the same arrows</p></div></div><div class="rbp"><div>${RB.portalA}<p class="hint" style="text-align:center">Archmage, acting as an Archmage's Tower</p></div><div>${RB.portalFar}<p class="hint" style="text-align:center">From a distance. Gold still points one square back toward the way in.</p></div></div><div class="rbp"><div>${RB.portalLJ}<p class="hint" style="text-align:center">A wizard's L. Same entry, same exit, same push.</p></div><div><p>If the square the gate would push onto is occupied or off the board, the piece cannot enter from that side. Enemies can never pass through yours. An enemy Stone Golem can destroy a Wizard Tower or an Archmage's Tower.</p></div></div>`;
     h+=ch('recruit','IX','Recruiting and the Camp')+`<div class="rbp"><div>${RB.camp}</div><div><p class="dc">Once per turn, recruiting (1 action) brings back one of <b>your own fallen knights</b>, captured or sacrificed, to an empty camp square of your choice, in full view of your opponent. You can only recruit knights that are actually in the graveyard, and only onto a camp square whose back-row square is <b>empty when you recruit</b>. One knight per camp square: only the Sellswords artifact can bring a cavalry pair, and it follows the same empty-square rule.</p><p>At the start of your next turn every recruit lands on the back-row square in front of its camp square and <b>may move and capture at once</b>, but it <b>cannot stack or be stacked onto</b> on the turn it lands. If something moves onto that square before then, the recruit waits in camp until it is clear. Pieces in camp cannot be captured.</p></div></div>`;
   h+=ch('check','X','Check and Desperate Measures')+`<div class="rbp"><div>${RB.check}</div><div><p class="dc">Check applies only when an empire is down to <b>one noble piece</b>: a single noble or a king. That piece may never end in danger, meaning it could be captured by one enemy action. If it begins your turn in danger, an action this turn must end the danger: move it, capture the attacker, block, recruit, or use an artifact. If nothing can, it is <b>checkmate</b> and you lose. With two or more noble pieces, check does not apply.</p></div></div><ul><li>A last noble moves only once per turn. The other action may <b>recruit</b> a fallen knight or <b>use your artifact</b>, even while the noble is in danger, so long as the turn still gets the noble out of it.</li><li><b>Last stand</b>: with only one noble and one knight left, that knight may move twice in one turn.</li></ul>`;
-  h+=ch('win','XI','Winning and Drawing')+`<ul><li>Capture every enemy noble and you win. A king counts as two.</li><li>If each side has only a single noble and nothing else, the game is a <b>stalemate</b> and a draw.</li><li><b>Tournament rule: turn limit (optional, off by default)</b>: after 100 turns, 50 each, the side with more nobles on the board wins (a king counts as 2). Equal nobles is a draw.</li><li><b>Game options</b> (setup screen): Artifacts on or off; Move hints as Tutorial (move dots shown) or Fog of war (no hints; the danger pulse on a last noble still shows).</li><li><b>Tournament rule: timed games</b> (10, 20 or 30 minutes per game) split the time evenly; your clock runs only on your turns. If your clock reaches zero, you lose.</li></ul>`;
+  h+=ch('win','XI','Winning and Drawing')+`<ul><li>Capture every enemy noble and you win. A king counts as two.</li><li>If each side has only a single noble and nothing else, the game is a <b>stalemate</b> and a draw.</li><li><b>Points</b>, used when a clock runs out or the tournament turn limit is reached: your pieces still on the board, plus every piece you have captured. Knight 1, cavalry 3, noble 5, king 10, wizard tower 7, wizard 7, archmage 9, Archmage's Tower 9. The higher total wins. Equal points is a draw.</li><li><b>Tournament rule: turn limit (optional, off by default)</b>: after 100 turns, 50 each, points decide.</li><li><b>Game options</b> (setup screen): Artifacts on or off; Move hints as Tutorial (move dots shown) or Fog of war (no hints; the danger pulse on a last noble still shows).</li><li><b>Timed games</b> (5, 10, 20 or 30 minutes per game) split the time evenly; your clock runs only on your turns. When a clock reaches zero, points decide.</li></ul>`;
   h+=ch('art','XII','The Artifacts')+`<p class="dc">Each side holds one artifact, shown as a figurine with its card. Artifacts cannot be used on your first turn. Once used, the figurine returns to the treasure box and its card to the card box.</p><div class="grid3">`+ART.map(a=>`<div class="card"><div class="nm">${a.name}</div>${artArt(a.id)}<div class="fg">Figurine: ${a.fig}</div><div class="cs">${a.cost}</div><div class="tx">${a.text}</div></div>`).join('')+`</div>`;
   h+=ch('ref','XIII','Quick Reference')+`<table class="rbq"><tr><th>Piece</th><th>Move</th><th>Capture</th></tr>
   <tr><td>Knight</td><td>1 forward; 2 forward on its first move from rows 1–2; 1 straight back; Front Line</td><td>1 diagonally forward. Retreat and Front Line do not capture</td></tr>
@@ -1630,7 +1645,7 @@ function lorePage(){
   </ul>
 
   <h3><span class="orn">❦</span> VI. The Relics</h3>
-  <p class="dc">Each empire laid one relic on the table beside the board, a memory of the Long War: the hidden archers of the Weeping Ridge, the stone golem that broke the siege of Harrowgate, the royal decree of a king who once titled a stable boy, the swordsmanship taught to a lord, the sellswords from across the sea, the berserker of the northern shore, the sapper's sacrifice, the blink rune, the cavalry's flanking step and the shield wall. A relic could be used once, then sealed back in the treasure box, because no one should win a war twice by the same trick.</p>
+  <p class="dc">Each empire laid one relic on the table beside the board, a memory of the Long War: the hidden archers of the Weeping Ridge, the stone golem that broke the siege of Harrowgate, the royal decree of a king who once titled a stable boy, the swordsmanship taught to a lord, the sellswords from across the sea, the berserker of the northern shore, the sapper's sacrifice, the blink rune, the cavalry's flanking step and the charge. A relic could be used once, then sealed back in the treasure box, because no one should win a war twice by the same trick.</p>
 
   <h3><span class="orn">❦</span> VII. The Game That Ended the War</h3>
   <p class="dc">The kings played for seven nights. The chronicles disagree on who won. The Fulgar chroniclers say their king's last knight crossed the board and was crowned on the final night. The Angtapa chroniclers say their king stalemated him and called it victory. Both agree on what came after: the losing empire opened its granaries to the winner's hungry, and the winner opened its roads to the loser's trade. Neither army marched again.</p>
@@ -1648,7 +1663,7 @@ setInterval(()=>{
   const now=performance.now(),dt=now-lastTick;lastTick=now;
   if(!S.clock||S.phase!=='play'||S.winner||paused)return;
   S.clock[S.turn]-=dt;
-  if(S.clock[S.turn]<=0){S.clock[S.turn]=0;S.winner=opp(S.turn);S.result=`Time — ${NAME[S.turn]}'s clock ran out. ${NAME[opp(S.turn)]} wins.`;S.log.push(`★ ${S.result}`);botToken++;render();return;}
+  if(S.clock[S.turn]<=0){S.clock[S.turn]=0;settlePoints(S,'Time');S.log.push(`★ ${S.result}`);botToken++;render();return;}
   updClocks();
 },250);
 $('bUndo').onclick=()=>{if(!H.length)return;botToken++;const ck=S.clock,wn=S.winner&&S.result.startsWith('Time');S=JSON.parse(H.pop());while(H.length&&isAI(S.turn)&&!(S.mode.ai.w&&S.mode.ai.b)&&S.phase==='play')S=JSON.parse(H.pop());if(ck&&!wn)S.clock=ck;ui={kinds:null,path:[],sel:null};render();};
