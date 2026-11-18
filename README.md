@@ -33,7 +33,7 @@ You win by taking every enemy noble. A king counts as two. If each side has noth
 - **Charge** replaces Shield Wall. A knight, a cavalry, or a noble moves farther than it normally can, up to twice as far in one straight direction, and may capture once if that is already how it captures. It costs both actions. A king, a wizard, an archmage, and either tower cannot charge.
 - **Flank** is one action, and only once in the game. One cavalry steps a single square left or right and may capture there.
 - **Swordsmanship** is not a shot. The noble, or the king, steps onto the square and takes the piece that was standing there.
-- **Sapper's Sacrifice** spends a knight or a cavalry to kill one enemy piece touching it, including a Wizard Tower or an Archmage's Tower.
+- **Sapper's Sacrifice** spends one knight, never a cavalry, to kill one enemy piece touching it, including a Wizard Tower or an Archmage's Tower. That knight can be recruited on a later turn. Only one knight may be recruited per turn, unless Sellswords is used.
 - **Stone Golem** moves one Wizard Tower a single square, and that tower can destroy an enemy tower or an Archmage's Tower.
 - **Time.** Untimed, or a 5, 10, 20, or 30 minute game. The clock is split evenly, and it runs only on your own turn. A 5 minute game is two and a half minutes each.
 - **Points settle a flag and a long tournament.** Knight 1, cavalry 3, noble 5, king 10, wizard 7, Wizard Tower 7, archmage 9, Archmage's Tower 9. Your score is every piece still on the board plus every piece you have captured. The higher total wins. A tie is a draw.
