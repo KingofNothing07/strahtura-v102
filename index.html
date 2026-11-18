@@ -835,7 +835,7 @@ function soundFor(sp){
     if(sp.kind==='cavnoble'||sp.kind==='tonoble'||sp.kind==='flip'){sfx('promote');return;}
     sfx('magic');return;
   }
-  if(sp.t==='recruit'){if(sp.art)sfx('magic');else sfx('recruit');return;}
+  if(sp.t==='recruit')return;
   if(sp.t==='unstack'){playFx('stack');return;}
   if(sp.stack){if(sp.mover&&sp.mover.t==='wizard')sfx('wstack');else playFx('stack');return;}
   if(sp.art){sfx('magic');if(capt)setTimeout(()=>playFx('capture'),160);return;}
